@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-23 20:59",
-  "summary": "8/10",
+  "date": "2026-11-23 21:20",
+  "summary": "10/10",
   "results": [
     {
       "item": "相册展示-前端",
@@ -25,22 +25,22 @@
     {
       "item": "相册展示-地址文件(base/nas.json)",
       "ok": true,
-      "detail": "地址=https://heat-quarter-bon-levy.trycloudflare.com updated=2026-11-23T12:49:17Z 距今=0.2h"
+      "detail": "地址=https://mothers-hero-troy-reflects.trycloudflare.com updated=2026-11-23T13:16:33Z 距今=0.1h"
     },
     {
       "item": "相册展示-隧道 /api/health",
-      "ok": false,
-      "detail": "HTTP 530 body=<!doctype html>\n<!--[if lt IE 7]> <html  ACAO=None（期望 200 + {\"ok\":true} + CORS 单值）"
+      "ok": true,
+      "detail": "HTTP 200 body={\"ok\": true} ACAO='*'"
     },
     {
       "item": "相册展示-隧道 index.json 缓存头",
-      "ok": false,
-      "detail": "HTTP 530 cache-control='private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0'（期望 200 + no-store）"
+      "ok": true,
+      "detail": "HTTP 200 cache-control='no-store'"
     },
     {
       "item": "PDF工具-地址文件(base/nas.json)",
       "ok": true,
-      "detail": "地址=https://huge-alive-london-rendering.trycloudflare.com updated=2026-11-23T12:54:42Z 距今=0.1h"
+      "detail": "地址=https://huge-alive-london-rendering.trycloudflare.com updated=2026-11-23T13:15:44Z 距今=0.1h"
     },
     {
       "item": "PDF工具-隧道门禁(无key)",
