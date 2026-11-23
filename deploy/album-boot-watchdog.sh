@@ -14,6 +14,8 @@
 #
 # 凭据：不读 PAT、不写 GitHub——地址同步交给 base-sync.sh，本脚本只管进程活着与日志。
 # 依赖：cloudflared 二进制在 $P/cloudflared（相册现状，非 PATH），grep/sleep 为 busybox 自带。
+# 关键参数 --protocol http2：2026-11-23 实测该 NAS 出口 QUIC/UDP 被阻，默认 QUIC 反复超时导致隧道 530；
+#   强制 HTTP/2(TCP) 后 Registered 成功、health 200。此参数必须保留，勿删。
 # =============================================================================
 
 P=${ALBUM_HOME:-/var/lib/tailscale}
@@ -30,7 +32,7 @@ chmod +x "$CFBIN" 2>/dev/null
 # ---------- 守护循环：cloudflared 一旦退出就重启 ----------
 (
   while true; do
-    "$CFBIN" tunnel --url http://127.0.0.1:8443 --no-autoupdate >"$CFLOG" 2>&1
+    "$CFBIN" tunnel --url http://127.0.0.1:8443 --no-autoupdate --protocol http2 >"$CFLOG" 2>&1
     log "cloudflared exited, restart in ${RESTART_DELAY}s"
     sleep "$RESTART_DELAY"
   done
