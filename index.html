@@ -3,158 +3,132 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>我的工具站 · 入口与状态</title>
+<title>我的工具站 · 统一入口</title>
 <style>
   :root{
     --bg:#0e1014; --card:#181b21; --card2:#21252e; --line:#2b303b;
     --fg:#e9ebf1; --muted:#98a1b2; --ok:#3bc887; --bad:#e5484d; --warn:#e5a53c; --accent:#6ea8fe;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--fg);
-    font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
-  .wrap{max-width:1000px;margin:0 auto;padding:44px 20px 80px}
-  h1{font-size:27px;margin:0 0 4px;letter-spacing:.3px}
-  .sub{color:var(--muted);font-size:13px;margin-bottom:8px}
-  .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);margin-right:6px}
-  .live-dot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(59,200,135,.12)}
-  .live-dot.bad{background:var(--bad)}
-  .live-dot.warn{background:var(--warn)}
-  .summary{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 30px}
-  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px}
-  .pill b{font-size:15px}
-  .pill.ok b{color:var(--ok)} .pill.bad b{color:var(--bad)} .pill.warn b{color:var(--warn)}
-  .sec{font-size:12px;color:var(--muted);letter-spacing:1.6px;text-transform:uppercase;
-    margin:32px 0 14px;border-bottom:1px solid var(--line);padding-bottom:8px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;
-    display:flex;flex-direction:column;gap:9px;transition:border-color .2s,transform .2s;text-decoration:none;color:inherit}
-  a.card:hover{border-color:var(--accent);transform:translateY(-2px)}
-  .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .name{font-weight:650;font-size:16px}
-  .badge{font-size:11px;padding:3px 9px;border-radius:6px;white-space:nowrap}
-  .badge.live{background:rgba(59,200,135,.12);color:var(--ok)}
-  .badge.dead{background:rgba(229,72,77,.12);color:var(--bad)}
-  .badge.tool{background:rgba(110,168,254,.12);color:var(--accent)}
-  .desc{color:var(--muted);font-size:13px;min-height:40px}
-  .meta{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;
-    display:flex;justify-content:space-between;gap:8px}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  header{height:56px;display:flex;align-items:center;gap:18px;padding:0 18px;
+    border-bottom:1px solid var(--line);background:#14171c;position:sticky;top:0;z-index:10}
+  .brand{font-weight:700;font-size:16px;letter-spacing:.3px;white-space:nowrap}
+  .brand span{color:var(--accent)}
+  nav{display:flex;gap:6px;flex:1;overflow-x:auto}
+  .tab{background:transparent;border:1px solid transparent;color:var(--muted);cursor:pointer;
+    padding:7px 13px;border-radius:8px;white-space:nowrap;font-size:13px;display:flex;align-items:center;gap:7px}
+  .tab:hover{background:var(--card2);color:var(--fg)}
+  .tab.active{background:var(--card2);color:var(--fg);border-color:var(--line)}
+  .tab .d{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
+  .tab .d.ok{background:var(--ok)} .tab .d.bad{background:var(--bad)} .tab .d.warn{background:var(--warn)}
+  .right{display:flex;align-items:center;gap:12px;white-space:nowrap}
+  #liveDot{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block}
+  #liveDot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(59,200,135,.12)}
+  #liveDot.bad{background:var(--bad)}
+  #liveText{font-size:12px;color:var(--muted)}
+  .ext{font-size:12px;color:var(--muted);text-decoration:none;padding:6px 10px;border:1px solid var(--line);border-radius:7px}
+  .ext:hover{border-color:var(--accent);color:var(--fg)}
+  main{position:relative;height:calc(100% - 56px)}
+  iframe{width:100%;height:100%;border:0;display:none;background:#fff}
+  iframe.active{display:block}
+  .panel{display:none;padding:26px;max-width:900px;margin:0 auto}
+  .panel.active{display:block}
+  h2{font-size:20px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:18px 0 30px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;transition:.15s}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .card .n{font-weight:650;font-size:15px;margin-bottom:6px}
+  .card .t{color:var(--muted);font-size:12px}
   table{width:100%;border-collapse:collapse;font-size:13px}
-  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
   th{color:var(--muted);font-weight:500}
-  .ok-t{color:var(--ok)} .bad-t{color:var(--bad)} .warn-t{color:var(--warn)} .muted-t{color:var(--muted)}
-  .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
-    border-radius:10px;padding:14px 16px;color:var(--muted);font-size:13px;margin-top:28px}
+  .ok-t{color:var(--ok)} .bad-t{color:var(--bad)} .muted-t{color:var(--muted)}
+  .note{background:var(--card);border-left:3px solid var(--accent);border-radius:8px;padding:12px 14px;
+    color:var(--muted);font-size:12px;margin-top:20px}
   .note b{color:var(--fg)}
-  code{background:var(--card2);padding:1px 6px;border-radius:5px;font-size:12px}
-  .foot{margin-top:34px;color:var(--muted);font-size:12px;text-align:center}
+  code{background:var(--card2);padding:1px 5px;border-radius:4px;font-size:11px}
+  @media(max-width:720px){.brand{font-size:14px}#liveText{display:none}.ext{display:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>我的工具站</h1>
-  <div class="sub">六个自建工具的统一入口 · 打开本页即实时探测各入口可达性</div>
-  <div class="sub"><span id="liveDot" class="live-dot warn"></span><span id="liveText">正在实时探测…</span></div>
-
-  <div class="summary" id="summary">
-    <div class="pill"><b>6</b> 个工具</div>
-    <div class="pill"><b id="snapCount">—</b> 快照检查</div>
-    <div class="pill"><b id="liveCount">—</b> 实时可达</div>
+<header>
+  <div class="brand">我的<span>工具站</span></div>
+  <nav id="nav">
+    <button class="tab active" data-target="panel-home"><span class="d ok"></span>总览</button>
+    <button class="tab" data-target="frame-album" data-page="https://elizond0.github.io/album/"><span class="d"></span>相册</button>
+    <button class="tab" data-target="frame-pdf" data-page="https://elizond0.github.io/pdf-tools/"><span class="d"></span>PDF</button>
+    <button class="tab" data-target="frame-smzdm" data-page="https://elizond0.github.io/smzdm-daily/"><span class="d"></span>值得买</button>
+    <button class="tab" data-target="frame-gelianghao" data-page="https://elizond0.github.io/gelianghao/"><span class="d"></span>哥俩好</button>
+  </nav>
+  <div class="right">
+    <span id="liveDot"></span><span id="liveText">探测中…</span>
+    <a class="ext" href="data/latest.json" target="_blank">监测数据</a>
   </div>
-
-  <div class="sec">工具入口</div>
-  <div class="grid" id="cards">
-    <a class="card" href="https://elizond0.github.io/album/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/album/">
-      <div class="top"><span class="name">相册展示</span><span class="badge tool" data-badge>检测中</span></div>
-      <div class="desc">NAS 直链相册。GitHub Pages 前端 + Cloudflare 隧道回源，隧道地址自动追平。</div>
-      <div class="meta"><span>NAS 后端 · 隧道</span><span data-live class="muted-t">—</span></div>
-    </a>
-    <a class="card" href="https://elizond0.github.io/pdf-tools/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/pdf-tools/">
-      <div class="top"><span class="name">PDF 工具站</span><span class="badge tool" data-badge>检测中</span></div>
-      <div class="desc">纯前端 PDF 工具 + NAS 增强（无损压缩 / OCR / Office 转 PDF）。</div>
-      <div class="meta"><span>NAS 后端 · 隧道</span><span data-live class="muted-t">—</span></div>
-    </a>
-    <a class="card" href="https://elizond0.github.io/smzdm-daily/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/smzdm-daily/">
-      <div class="top"><span class="name">什么值得买</span><span class="badge tool" data-badge>检测中</span></div>
-      <div class="desc">每日好价日报。GitHub Pages 静态站，无需 NAS。</div>
-      <div class="meta"><span>纯静态</span><span data-live class="muted-t">—</span></div>
-    </a>
-    <a class="card" href="https://elizond0.github.io/gelianghao/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/gelianghao/">
-      <div class="top"><span class="name">哥俩好小游戏</span><span class="badge tool" data-badge>检测中</span></div>
-      <div class="desc">双人协作跳跃游戏。GitHub Pages 纯静态，单机可玩。</div>
-      <div class="meta"><span>纯静态</span><span data-live class="muted-t">—</span></div>
-    </a>
-    <div class="card">
-      <div class="top"><span class="name">workbuddy 签到</span><span class="badge tool">定时任务</span></div>
-      <div class="desc">云端 + NAS 青龙双端签到。无对外页面，由定时任务执行。</div>
-      <div class="meta"><span>云端任务 15581633</span><span class="muted-t">无需入口</span></div>
+</header>
+<main>
+  <div class="panel active" id="panel-home">
+    <h2>六个自建工具 · 统一入口</h2>
+    <div class="muted-t" style="font-size:13px">顶部切换即进入对应工具（原站点内容，不作改动）；本页打开时实时探测各入口。</div>
+    <div class="grid">
+      <div class="card" data-go="frame-album"><div class="n">相册展示</div><div class="t">NAS 直链相册 · Pages 前端 + 隧道后端</div></div>
+      <div class="card" data-go="frame-pdf"><div class="n">PDF 工具站</div><div class="t">纯前端 PDF + NAS 增强</div></div>
+      <div class="card" data-go="frame-smzdm"><div class="n">什么值得买</div><div class="t">每日好价日报 · 纯静态</div></div>
+      <div class="card" data-go="frame-gelianghao"><div class="n">哥俩好小游戏</div><div class="t">双人协作跳跃 · 纯静态</div></div>
+      <div class="card"><div class="n">workbuddy 签到</div><div class="t">云端 + NAS 青龙定时任务 · 无页面</div></div>
+      <div class="card"><div class="n">验证码工具</div><div class="t">TOTP 公共模块 · 无页面</div></div>
     </div>
-    <div class="card">
-      <div class="top"><span class="name">验证码工具</span><span class="badge tool">公共模块</span></div>
-      <div class="desc">TOTP 动态码验证公共模块，供其他工具复用。非独立服务。</div>
-      <div class="meta"><span>模块</span><span class="muted-t">无需入口</span></div>
-    </div>
+    <h2 style="font-size:16px">监测快照 <span id="snapDate" class="muted-t" style="font-size:12px;font-weight:400"></span></h2>
+    <table><thead><tr><th>检查项</th><th>结果</th><th>说明</th></tr></thead>
+      <tbody id="snapBody"><tr><td colspan="3" class="muted-t">加载中…</td></tr></tbody></table>
+    <div class="note"><b>故障隔离：</b>各工具以独立 iframe 承载，某个后端不可达只影响对应页签，其余照常使用；原站点文件完全不动，资源（字体/wasm/JS）继续由原 Pages 提供，不存在迁移破坏路径的风险。</div>
   </div>
-
-  <div class="sec">监测明细（来自每日 20:00 快照 <span id="snapDate" class="muted-t"></span>）</div>
-  <table id="snapTable">
-    <thead><tr><th>检查项</th><th>结果</th><th>说明</th></tr></thead>
-    <tbody><tr><td colspan="3" class="muted-t">正在加载 data/latest.json…</td></tr></tbody>
-  </table>
-
-  <div class="note">
-    <b>关于"实时"的边界：</b>本页的"实时可达"是浏览器直接请求各 Pages 前端（公开、无鉴权），只反映<b>入口前端</b>是否可打开；
-    NAS 后端隧道（相册/PDF）的判活需探测其 API 端点，受跨域限制不能在此页直接做，由每日监测任务与服务端自愈负责，结果写入上方快照表。
-    两者分工：本页回答"工具入口在不在"，监测任务回答"后端隧道通不通"。
-  </div>
-  <div class="foot">工具站入口 · 数据由每日监测与服务端自愈共同维护</div>
-</div>
+  <iframe id="frame-album" src="about:blank" data-src="https://elizond0.github.io/album/"></iframe>
+  <iframe id="frame-pdf" src="about:blank" data-src="https://elizond0.github.io/pdf-tools/"></iframe>
+  <iframe id="frame-smzdm" src="about:blank" data-src="https://elizond0.github.io/smzdm-daily/"></iframe>
+  <iframe id="frame-gelianghao" src="about:blank" data-src="https://elizond0.github.io/gelianghao/"></iframe>
+</main>
 <script>
 (function(){
-  const pages = [...document.querySelectorAll('[data-page]')];
-  const liveDot = document.getElementById('liveDot');
-  const liveText = document.getElementById('liveText');
-  const liveCount = document.getElementById('liveCount');
-  let done = 0, ok = 0;
-
-  function finish(){
-    done++;
-    if(done===pages.length){
-      liveCount.textContent = ok + '/' + pages.length;
-      liveDot.className = 'live-dot ' + (ok===pages.length ? 'ok' : (ok===0 ? 'bad' : 'warn'));
-      liveText.textContent = ok===pages.length ? '实时探测完成：全部入口可达'
-        : (ok===0 ? '实时探测完成：入口均不可达' : '实时探测完成：部分入口异常');
-    }
+  const nav=[...document.querySelectorAll('.tab')];
+  const frames=[...document.querySelectorAll('iframe')];
+  const panels=[...document.querySelectorAll('.panel')];
+  function show(id){
+    panels.forEach(p=>p.classList.toggle('active', p.id===id));
+    frames.forEach(f=>f.classList.toggle('active', f.id===id));
+    nav.forEach(t=>t.classList.toggle('active', t.dataset.target===id));
+    const f=document.getElementById(id);
+    if(f && f.tagName==='IFRAME' && f.src==='about:blank') f.src=f.dataset.src;
+    window.scrollTo(0,0);
   }
+  nav.forEach(t=>t.addEventListener('click',()=>show(t.dataset.target)));
+  document.querySelectorAll('[data-go]').forEach(c=>c.addEventListener('click',()=>show(c.dataset.go)));
 
-  pages.forEach(card=>{
-    const url = card.dataset.page;
-    const badge = card.querySelector('[data-badge]');
-    const live = card.querySelector('[data-live]');
-    // 加时间戳绕过 CDN 缓存；no-cors 模式下 opaque 响应也说明网络可达
-    const probe = url + '?t=' + Date.now();
-    const ctl = new AbortController();
-    const timer = setTimeout(()=>ctl.abort(), 8000);
-    fetch(probe, {mode:'no-cors', cache:'no-store', signal:ctl.signal})
-      .then(()=>{ clearTimeout(timer); ok++; badge.textContent='可达'; badge.className='badge live';
-                  live.textContent='实时 可达'; live.className='ok-t'; finish(); })
-      .catch(()=>{ clearTimeout(timer); badge.textContent='不可达'; badge.className='badge dead';
-                   live.textContent='实时 不可达'; live.className='bad-t'; finish(); });
+  // 实时探测四个入口（no-cors opaque 即视为网络可达）
+  const tabs=nav.filter(t=>t.dataset.page);
+  let done=0, ok=0;
+  const dot=document.getElementById('liveDot'), txt=document.getElementById('liveText');
+  tabs.forEach(t=>{
+    const d=t.querySelector('.d');
+    fetch(t.dataset.page+'?t='+Date.now(),{mode:'no-cors',cache:'no-store'})
+      .then(()=>{done++;ok++;d.className='d ok';})
+      .catch(()=>{done++;d.className='d bad';})
+      .finally(()=>{if(done===tabs.length){
+        dot.className= ok===tabs.length?'ok':(ok===0?'bad':'');
+        txt.textContent=`实时 ${ok}/${tabs.length} 入口可达`;
+      }});
   });
 
-  // 读监测快照
-  fetch('data/latest.json?t='+Date.now(), {cache:'no-store'})
-    .then(r=>r.ok ? r.json() : Promise.reject())
+  // 监测快照
+  fetch('data/latest.json?t='+Date.now(),{cache:'no-store'})
+    .then(r=>r.ok?r.json():Promise.reject())
     .then(d=>{
-      document.getElementById('snapDate').textContent = d.date || '';
-      document.getElementById('snapCount').textContent = d.summary || (d.results ? d.results.length+' 项' : '—');
-      const body = document.querySelector('#snapTable tbody');
-      body.innerHTML = (d.results||[]).map(r=>{
-        const cls = r.ok===true ? 'ok-t' : (r.ok===false ? 'bad-t' : 'muted-t');
-        const mark = r.ok===true ? '✓' : (r.ok===false ? '✗' : '—');
-        return '<tr><td>'+ (r.item||'') +'</td><td class="'+cls+'">'+mark+'</td><td>'+ (r.detail||'') +'</td></tr>';
-      }).join('') || '<tr><td colspan="3" class="muted-t">暂无快照数据</td></tr>';
-    })
-    .catch(()=>{});
+      document.getElementById('snapDate').textContent='· '+d.date;
+      document.getElementById('snapBody').innerHTML=(d.results||[]).map(r=>
+        '<tr><td>'+r.item+'</td><td class="'+(r.ok?'ok-t':'bad-t')+'">'+(r.ok?'✓':'✗')+'</td><td>'+r.detail+'</td></tr>'
+      ).join('');
+    }).catch(()=>{});
 })();
 </script>
 </body>
