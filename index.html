@@ -80,7 +80,7 @@
       <div class="card"><div class="n">验证码工具</div><div class="t">TOTP 公共模块 · 无页面</div></div>
     </div>
     <h2 style="font-size:16px">监测快照 <span id="snapDate" class="muted-t" style="font-size:12px;font-weight:400"></span></h2>
-    <table><thead><tr><th>检查项</th><th>结果</th><th>说明</th></tr></thead>
+    <table><thead><tr><th>工具名</th><th>结果</th><th>说明</th></tr></thead>
       <tbody id="snapBody"><tr><td colspan="3" class="muted-t">加载中…</td></tr></tbody></table>
     <div class="note"><b>故障隔离：</b>各工具以独立 iframe 承载，某个后端不可达只影响对应页签，其余照常使用；原站点文件完全不动，资源（字体/wasm/JS）继续由原 Pages 提供，不存在迁移破坏路径的风险。</div>
   </div>
@@ -125,9 +125,21 @@
     .then(r=>r.ok?r.json():Promise.reject())
     .then(d=>{
       document.getElementById('snapDate').textContent='· '+d.date;
-      document.getElementById('snapBody').innerHTML=(d.results||[]).map(r=>
-        '<tr><td>'+r.item+'</td><td class="'+(r.ok?'ok-t':'bad-t')+'">'+(r.ok?'✓':'✗')+'</td><td>'+r.detail+'</td></tr>'
-      ).join('');
+      // 按工具聚合：一个工具一行；说明列只写异常项，正常项留空
+      const tools={};
+      (d.results||[]).forEach(r=>{
+        const name=(r.item||'').split('-')[0];
+        if(!tools[name]) tools[name]={ok:true,notes:[]};
+        if(!r.ok){
+          tools[name].ok=false;
+          const sub=(r.item||'').includes('-')?(r.item||'').split('-').slice(1).join('-'):'';
+          tools[name].notes.push((sub?sub+'：':'')+(r.detail||'异常'));
+        }
+      });
+      document.getElementById('snapBody').innerHTML=Object.keys(tools).map(name=>{
+        const t=tools[name];
+        return '<tr><td>'+name+'</td><td class="'+(t.ok?'ok-t':'bad-t')+'">'+(t.ok?'✓':'✗')+'</td><td class="'+(t.ok?'muted-t':'bad-t')+'">'+(t.ok?'':t.notes.join('；'))+'</td></tr>';
+      }).join('');
     }).catch(()=>{});
 })();
 </script>
