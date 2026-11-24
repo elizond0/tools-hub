@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-24 10:24",
-  "summary": "8/10",
+  "date": "2026-11-24 10:26",
+  "summary": "10/10",
   "results": [
     {
       "item": "相册展示-地址文件(base/nas.json)",
@@ -14,7 +14,7 @@
     },
     {
       "item": "相册展示-隧道 /api/health",
-      "ok": false,
+      "ok": true,
       "detail": "HTTP 200 body={\"ok\": true} ACAO=*"
     },
     {
@@ -24,8 +24,8 @@
     },
     {
       "item": "PDF工具-隧道门禁(无key)",
-      "ok": false,
-      "detail": "HTTPError: HTTP Error 403: Forbidden"
+      "ok": true,
+      "detail": "HTTP 403"
     },
     {
       "item": "PDF工具-隧道预检(OPTIONS)",
