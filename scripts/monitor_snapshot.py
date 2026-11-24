@@ -48,8 +48,12 @@ def http(url, method='GET', headers=None, body=None, timeout=TIMEOUT):
     if headers:
         h.update(headers)
     req = urllib.request.Request(url, data=body, headers=h, method=method)
-    with urllib.request.urlopen(req, timeout=timeout, context=CTX) as r:
-        return r.status, r.read(), dict(r.headers)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout, context=CTX) as r:
+            return r.status, r.read(), dict(r.headers)
+    except urllib.error.HTTPError as e:
+        # 4xx/5xx 是判据信号（如门禁 403、OPTIONS 需另判），不当作网络异常
+        return e.code, e.read(), dict(e.headers)
 
 
 def get_addr_file(tool):
@@ -87,7 +91,8 @@ def run():
     if base:
         try:
             st, b, hd = http(base + '/api/health', timeout=TIMEOUT)
-            ok = st == 200 and b'"ok": true' in b.replace(b' ', b'')
+            body_txt = b.decode('utf-8', 'ignore').replace(' ', '')
+            ok = st == 200 and '"ok":true' in body_txt
             results.append({'item': '相册展示-隧道 /api/health', 'ok': ok,
                             'detail': 'HTTP %d body=%s ACAO=%s' % (
                                 st, b.decode('utf-8', 'ignore').strip()[:40], hd.get('Access-Control-Allow-Origin', ''))})
