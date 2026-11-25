@@ -23,8 +23,6 @@
     text-decoration:none}
   .tab:hover{background:var(--card2);color:var(--fg)}
   .tab.active{background:var(--card2);color:var(--fg);border-color:var(--line)}
-  .tab .d{width:7px;height:7px;border-radius:50%;background:#b9c0cc;flex:none}
-  .tab .d.ok{background:var(--ok)} .tab .d.bad{background:var(--bad)} .tab .d.warn{background:var(--warn)}
   .right{display:flex;align-items:center;gap:12px;white-space:nowrap;margin-left:auto}
   .ext{font-size:12px;color:var(--muted);text-decoration:none;padding:6px 10px;border:1px solid var(--line);
     border-radius:7px;background:var(--card)}
@@ -71,10 +69,10 @@
   <div class="brand">我的<span>工具站</span></div>
   <nav id="nav">
     <a class="tab active" href="index.html">总览</a>
-    <a class="tab" href="https://elizond0.github.io/album/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/album/"><span class="d"></span>相册</a>
-    <a class="tab" href="https://elizond0.github.io/pdf-tools/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/pdf-tools/"><span class="d"></span>PDF</a>
-    <a class="tab" href="https://elizond0.github.io/smzdm-daily/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/smzdm-daily/"><span class="d"></span>值得买</a>
-    <a class="tab" href="https://elizond0.github.io/gelianghao/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/gelianghao/"><span class="d"></span>哥俩好</a>
+    <a class="tab" href="https://elizond0.github.io/album/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/album/">相册</a>
+    <a class="tab" href="https://elizond0.github.io/pdf-tools/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/pdf-tools/">PDF</a>
+    <a class="tab" href="https://elizond0.github.io/smzdm-daily/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/smzdm-daily/">值得买</a>
+    <a class="tab" href="https://elizond0.github.io/gelianghao/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/gelianghao/">哥俩好</a>
   </nav>
   <div class="right">
     <a class="ext" href="monitor.html" target="_blank">监测数据</a>
@@ -100,7 +98,7 @@
     <tbody id="snapBody"><tr><td colspan="3" class="muted-t">加载中…</td></tr></tbody></table>
   <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，右上角「监测数据」可查看日志页，实时探测在打开本页时进行。</div>
 </main>
-<footer class="site-footer"><span data-build>v1.4 · 2026-11-25 15:10</span></footer>
+<footer class="site-footer"><span data-build>v1.5 · 2026-11-25 17:05</span></footer>
 <script>
 (function(){
   const nav=[...document.querySelectorAll('.tab')];
@@ -109,10 +107,9 @@
   let done=0, ok=0;
   const dot=document.getElementById('liveDot'), txt=document.getElementById('liveText');
   tabs.forEach(t=>{
-    const d=t.querySelector('.d');
     fetch(t.dataset.page+'?t='+Date.now(),{mode:'no-cors',cache:'no-store'})
-      .then(()=>{done++;ok++;d.className='d ok';})
-      .catch(()=>{done++;d.className='d bad';})
+      .then(()=>{done++;ok++;})
+      .catch(()=>{done++;})
       .finally(()=>{if(done===tabs.length){
         dot.className= ok===tabs.length?'status-dot ok':(ok===0?'status-dot bad':'status-dot');
         txt.textContent=`实时 ${ok}/${tabs.length} 入口可达`;
