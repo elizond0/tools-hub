@@ -6,61 +6,101 @@
 <title>我的工具站 · 统一入口</title>
 <style>
   :root{
-    --bg:#f6f7fb; --card:#ffffff; --card2:#f1f3f8; --line:#e3e7ef;
-    --fg:#1f2736; --muted:#6b7280; --ok:#16845b; --bad:#d64045; --warn:#bd7a13; --accent:#4f6ef7;
-    --shadow:0 2px 12px rgba(31,39,54,.05);
+    --bg:#f6f7fb; --card:#ffffff; --card2:#eef1f6; --line:#dfe4ec; --line-soft:#eaedf3;
+    --fg:#1f2736; --muted:#687182; --ok:#147a52; --bad:#c83c44; --warn:#a56a12; --accent:#3659d6;
+    --accent-soft:rgba(54,89,214,.10);
+    --font-display:ui-serif,"Noto Serif CJK SC","Songti SC","STSong",Georgia,serif;
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --space-1:4px; --space-2:8px; --space-3:16px; --space-4:24px; --space-5:40px;
+    --radius-sm:8px; --radius-md:12px; --radius-lg:18px;
+    --shadow:0 2px 12px rgba(28,36,51,.05); --shadow-hover:0 12px 28px rgba(54,89,214,.12);
+    --ease:cubic-bezier(.16,1,.3,1); --dur:320ms;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);
-    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
-  header{height:56px;display:flex;align-items:center;gap:18px;padding:0 18px;
-    border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:10}
-  .brand{font-weight:700;font-size:16px;letter-spacing:.3px;white-space:nowrap}
+  html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg)}
+  body{font:14px/1.65 var(--font-body);-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(48rem 30rem at 8% -12%,rgba(54,89,214,.10),transparent 62%),
+      radial-gradient(40rem 26rem at 96% 4%,rgba(20,122,82,.08),transparent 58%),
+      linear-gradient(rgba(28,36,51,.025) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(28,36,51,.025) 1px,transparent 1px);
+    background-size:auto,auto,28px 28px,28px 28px}
+  header,main,.site-footer{position:relative;z-index:1}
+  header{min-height:60px;display:flex;align-items:center;gap:16px;padding:0 18px;
+    border-bottom:1px solid var(--line);background:var(--card);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:sticky;top:0;z-index:10}
+  .brand{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:.02em;white-space:nowrap}
   .brand span{color:var(--accent)}
-  nav{display:flex;gap:6px;flex:1;overflow-x:auto}
+  nav{display:flex;gap:6px;flex:1;overflow-x:auto;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
   .tab{background:transparent;border:1px solid transparent;color:var(--muted);cursor:pointer;
-    padding:7px 13px;border-radius:8px;white-space:nowrap;font-size:13px;display:flex;align-items:center;gap:7px;
-    text-decoration:none}
+    min-height:40px;padding:7px 13px;border-radius:var(--radius-sm);white-space:nowrap;font-size:13px;
+    display:flex;align-items:center;gap:7px;text-decoration:none;transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
   .tab:hover{background:var(--card2);color:var(--fg)}
   .tab.active{background:var(--card2);color:var(--fg);border-color:var(--line)}
   .right{display:flex;align-items:center;gap:12px;white-space:nowrap;margin-left:auto}
-  .ext{font-size:12px;color:var(--muted);text-decoration:none;padding:6px 10px;border:1px solid var(--line);
-    border-radius:7px;background:var(--card)}
-  .ext:hover{border-color:var(--accent);color:var(--accent);background:var(--card2)}
-  main{padding:26px;max-width:900px;margin:0 auto}
-  h2{font-size:20px;margin:0 0 8px}
-  .subline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:18px}
-  .status{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);
-    border-radius:999px;padding:4px 11px;color:var(--muted);box-shadow:var(--shadow)}
+  .ext{font-size:12px;color:var(--muted);text-decoration:none;padding:8px 12px;border:1px solid var(--line);
+    border-radius:var(--radius-sm);background:var(--card);transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+  .ext:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  main{padding:34px 26px;max-width:960px;margin:0 auto}
+  h1,h2{font-family:var(--font-display);font-weight:700}
+  h1{font-size:clamp(26px,3.4vw,34px);line-height:1.18;margin:0 0 10px;letter-spacing:-.02em}
+  h2{font-size:17px;margin:0 0 8px}
+  .subline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:22px}
+  .status{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.88);border:1px solid var(--line);
+    border-radius:999px;padding:6px 12px;color:var(--fg);box-shadow:var(--shadow);font-variant-numeric:tabular-nums}
   .status-dot{width:8px;height:8px;border-radius:50%;background:var(--warn);flex:none}
-  .status-dot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(22,132,91,.14)}
-  .status-dot.bad{background:var(--bad);box-shadow:0 0 0 3px rgba(214,64,69,.12)}
-  .sep{color:#c2c8d2}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:18px 0 30px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;transition:.15s;
-    text-decoration:none;color:inherit;display:block;box-shadow:var(--shadow)}
-  .card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 18px rgba(79,110,247,.10)}
-  .card.disabled{cursor:default;opacity:.75}
+  .status-dot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(20,122,82,.15)}
+  .status-dot.bad{background:var(--bad);box-shadow:0 0 0 3px rgba(200,60,68,.14)}
+  .sep{color:#aeb6c3}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(278px,1fr));gap:14px;margin:0 0 34px}
+  .card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:18px;cursor:pointer;text-decoration:none;color:inherit;display:block;box-shadow:var(--shadow);
+    min-height:88px;transition:transform var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+  .card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+  .card.disabled{cursor:default;opacity:.72}
   .card.disabled:hover{border-color:var(--line);transform:none;box-shadow:var(--shadow)}
-  .card .n{font-weight:650;font-size:15px;margin-bottom:6px}
-  .card .n::after{content:" ↗";font-size:12px;color:var(--muted)}
-  .card.disabled .n::after{content:""}
-  .card .t{color:var(--muted);font-size:12px}
-  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);
-    border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
-  th{color:var(--muted);font-weight:500;background:var(--card2)}
+  .card .n{font-weight:650;font-size:15px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .card .n::after{content:"↗";font-size:11px;color:var(--accent);background:var(--accent-soft);
+    width:22px;height:22px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+  .card.disabled .n::after{content:"—";color:var(--muted);background:var(--card2)}
+  .card .t{color:var(--muted);font-size:12px;line-height:1.6}
+  .snapshot{scroll-margin-top:80px}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:rgba(255,255,255,.94);
+    border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden;font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-soft)}
+  th{color:var(--muted);font-weight:600;background:var(--card2);letter-spacing:.03em}
   tr:last-child td{border-bottom:0}
+  tbody tr:hover td{background:rgba(54,89,214,.035)}
   .ok-t{color:var(--ok)} .bad-t{color:var(--bad)} .muted-t{color:var(--muted)}
-  .note{background:var(--card);border-left:3px solid var(--accent);border-radius:8px;padding:12px 14px;
-    color:var(--muted);font-size:12px;margin-top:20px;box-shadow:var(--shadow)}
+  .note{background:rgba(255,255,255,.9);border-left:3px solid var(--accent);border-radius:var(--radius-sm);
+    padding:13px 15px;color:var(--muted);font-size:12px;margin-top:20px;box-shadow:var(--shadow)}
   .note b{color:var(--fg)}
-  code{background:var(--card2);padding:1px 5px;border-radius:4px;font-size:11px}
-  .site-footer{max-width:900px;margin:0 auto;padding:14px 26px 26px;color:var(--muted);font-size:11px;text-align:center}
+  .note a{color:var(--accent)}
+  code{background:var(--card2);padding:1px 5px;border-radius:4px;font:11px var(--font-mono)}
+  a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .site-footer{max-width:960px;margin:0 auto;padding:14px 26px 30px;color:var(--muted);font:11px var(--font-mono);text-align:center}
+  @keyframes riseIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:no-preference){
+    .main-head{animation:riseIn var(--dur) var(--ease) both}
+    .grid .card{animation:riseIn var(--dur) var(--ease) both}
+    .grid .card:nth-child(-n+2){animation-delay:80ms}
+    .grid .card:nth-child(n+3):nth-child(-n+4){animation-delay:160ms}
+    .grid .card:nth-child(n+5){animation-delay:240ms}
+    .snapshot,.note{animation:riseIn var(--dur) var(--ease) 320ms both}
+  }
   @media(max-width:720px){
-    .brand{font-size:14px}.ext{display:none}.right{display:none}
-    .subline{align-items:flex-start}.status{margin-bottom:2px}
-    main{padding:20px 14px}.card{padding:14px}
+    header{gap:10px;padding:0 12px;min-height:56px}
+    .brand{font-size:15px}
+    .right{margin-left:0}
+    .ext{font-size:12px;padding:7px 9px}
+    main{padding:24px 14px}
+    .subline{align-items:flex-start}
+    .grid{grid-template-columns:1fr;gap:12px}
+    .card{padding:15px;min-height:78px}
+    th,td{padding:9px 10px}
   }
 </style>
 </head>
@@ -79,26 +119,30 @@
   </div>
 </header>
 <main>
-  <h2>六个自建工具 · 统一入口</h2>
-  <div class="subline">
-    <span class="status"><span id="liveDot" class="status-dot"></span><span id="liveText">探测中…</span></span>
-    <span class="sep">·</span>
-    <span>点击页签或卡片在新标签页直接进入对应工具（原站点内容，不作改动）；本页打开时实时探测各入口。</span>
+  <div class="main-head">
+    <h1>六个自建工具 · 统一入口</h1>
+    <div class="subline">
+      <span class="status" role="status" aria-live="polite"><span id="liveDot" class="status-dot"></span><span id="liveText">探测中…</span></span>
+      <span class="sep">·</span>
+      <span>点击页签或卡片在新标签页直接进入对应工具（原站点内容，不作改动）；本页打开时实时探测各入口。</span>
+    </div>
   </div>
   <div class="grid">
     <a class="card" href="https://elizond0.github.io/album/" target="_blank" rel="noopener"><div class="n">相册展示</div><div class="t">NAS 直链相册 · Pages 前端 + 隧道后端</div></a>
     <a class="card" href="https://elizond0.github.io/pdf-tools/" target="_blank" rel="noopener"><div class="n">PDF 工具站</div><div class="t">纯前端 PDF + NAS 增强</div></a>
     <a class="card" href="https://elizond0.github.io/smzdm-daily/" target="_blank" rel="noopener"><div class="n">什么值得买</div><div class="t">每日好价日报 · 纯静态</div></a>
     <a class="card" href="https://elizond0.github.io/gelianghao/" target="_blank" rel="noopener"><div class="n">哥俩好小游戏</div><div class="t">双人协作跳跃 · 纯静态</div></a>
-    <div class="card disabled"><div class="n">workbuddy 签到</div><div class="t">云端 + NAS 青龙定时任务 · 无页面</div></div>
-    <div class="card disabled"><div class="n">验证码工具</div><div class="t">TOTP 公共模块 · 无页面</div></div>
+    <div class="card disabled" aria-disabled="true"><div class="n">workbuddy 签到</div><div class="t">云端 + NAS 青龙定时任务 · 无页面</div></div>
+    <div class="card disabled" aria-disabled="true"><div class="n">验证码工具</div><div class="t">TOTP 公共模块 · 无页面</div></div>
   </div>
-  <h2 style="font-size:16px">监测快照 <span id="snapDate" class="muted-t" style="font-size:12px;font-weight:400"></span></h2>
-  <table><thead><tr><th>工具名</th><th>结果</th><th>说明</th></tr></thead>
-    <tbody id="snapBody"><tr><td colspan="3" class="muted-t">加载中…</td></tr></tbody></table>
-  <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，右上角「监测数据」可查看日志页，实时探测在打开本页时进行。</div>
+  <section class="snapshot">
+    <h2>监测快照 <span id="snapDate" class="muted-t" style="font:12px var(--font-body);font-weight:400"></span></h2>
+    <table><thead><tr><th>工具名</th><th>结果</th><th>说明</th></tr></thead>
+      <tbody id="snapBody"><tr><td colspan="3" class="muted-t">加载中…</td></tr></tbody></table>
+  </section>
+  <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，<a href="monitor.html" target="_blank">查看监测日志</a>可查历史记录，实时探测在打开本页时进行。</div>
 </main>
-<footer class="site-footer"><span data-build>v1.5 · 2026-11-25 17:05</span></footer>
+<footer class="site-footer"><span data-build>v1.6 · 2026-11-25 22:10</span></footer>
 <script>
 (function(){
   const nav=[...document.querySelectorAll('.tab')];
