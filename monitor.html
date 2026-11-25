@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>监测服务日志 · 我的工具站</title>
+<style>
+  :root{
+    --bg:#0e1014; --card:#181b21; --card2:#21252e; --line:#2b303b;
+    --fg:#e9ebf1; --muted:#98a1b2; --ok:#3bc887; --bad:#e5484d; --warn:#e5a53c; --accent:#6ea8fe;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);
+    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:inherit}
+  header{height:56px;display:flex;align-items:center;gap:18px;padding:0 18px;
+    border-bottom:1px solid var(--line);background:#14171c;position:sticky;top:0;z-index:10}
+  .brand{font-weight:700;font-size:16px;letter-spacing:.3px;white-space:nowrap}
+  .brand span{color:var(--accent)}
+  .head-right{margin-left:auto;display:flex;align-items:center;gap:10px;white-space:nowrap}
+  .btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;cursor:pointer;
+    padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);
+    font-size:12px;line-height:1.4}
+  .btn:hover{border-color:var(--accent);color:var(--fg);background:var(--card2)}
+  .btn.primary{color:var(--fg);border-color:#3f6fbf;background:rgba(110,168,254,.10)}
+  main{max-width:980px;margin:0 auto;padding:30px 24px 40px}
+  .hero{background:linear-gradient(135deg,rgba(110,168,254,.12),rgba(59,200,135,.06));
+    border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:22px}
+  .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  h1{font-size:24px;margin:0 0 6px;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px;margin:0}
+  .date-pill{display:inline-flex;align-items:center;gap:8px;background:var(--card2);
+    border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12px;color:var(--muted)}
+  .date-pill b{color:var(--fg);font-size:13px;font-weight:600}
+  .score{display:flex;align-items:baseline;gap:12px;margin-top:18px}
+  .score-num{font-size:42px;font-weight:700;line-height:1;letter-spacing:-1px}
+  .score-num.ok{color:var(--ok)} .score-num.bad{color:var(--bad)}
+  .score-label{color:var(--muted);font-size:13px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:20px}
+  .stat{background:rgba(0,0,0,.16);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .stat .k{font-size:12px;color:var(--muted)}
+  .stat .v{font-size:18px;font-weight:650;margin-top:3px}
+  .stat .v.ok{color:var(--ok)} .stat .v.bad{color:var(--bad)}
+  h2{font-size:17px;margin:28px 0 12px;display:flex;align-items:center;gap:9px}
+  h2::before{content:"";width:3px;height:16px;background:var(--accent);border-radius:2px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .tool{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 16px}
+  .tool-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .tool-name{font-weight:650;font-size:14px}
+  .badge{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid;white-space:nowrap}
+  .badge.ok{color:var(--ok);border-color:rgba(59,200,135,.45);background:rgba(59,200,135,.10)}
+  .badge.bad{color:var(--bad);border-color:rgba(229,72,77,.45);background:rgba(229,72,77,.10)}
+  .tool .cnt{color:var(--muted);font-size:12px;margin-top:8px}
+  .tool .notes{color:var(--bad);font-size:12px;margin-top:8px;line-height:1.5}
+  .wrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow-x:auto}
+  table{width:100%;min-width:720px;border-collapse:collapse;font-size:13px;table-layout:fixed}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;word-break:break-word}
+  th{color:var(--muted);font-weight:500;background:rgba(255,255,255,.015);white-space:nowrap}
+  th:nth-child(1),td:nth-child(1){width:130px;white-space:nowrap}
+  th:nth-child(3),td:nth-child(3){width:92px;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  .ok-t{color:var(--ok)} .bad-t{color:var(--bad)} .muted-t{color:var(--muted)}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px}
+  .dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)}
+  .note{background:var(--card);border-left:3px solid var(--accent);border-radius:8px;padding:12px 14px;
+    color:var(--muted);font-size:12px;margin-top:18px}
+  .note b{color:var(--fg)}
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0 14px;margin-top:18px}
+  summary{cursor:pointer;padding:12px 0;color:var(--muted);font-size:13px;user-select:none}
+  summary:hover{color:var(--fg)}
+  pre{white-space:pre-wrap;word-break:break-word;margin:0 0 14px;padding:12px;background:#0a0c10;
+    border:1px solid var(--line);border-radius:8px;color:#c7d0e0;font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;max-height:420px;overflow:auto}
+  .site-footer{max-width:980px;margin:0 auto;padding:0 24px 30px;color:var(--muted);font-size:11px;text-align:center}
+  .loading{padding:30px;text-align:center;color:var(--muted)}
+  @media(max-width:720px){
+    header{gap:10px;padding:0 12px}.brand{font-size:14px}.head-right .btn span{display:none}
+    main{padding:22px 14px 34px}.hero{padding:18px}.score-num{font-size:34px}
+    th,td{padding:9px 10px;font-size:12px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">我的<span>工具站</span></div>
+  <div class="head-right">
+    <a class="btn" href="index.html">← 返回总览</a>
+    <button class="btn primary" id="reloadBtn" type="button" title="重新读取最新快照">↻ <span>刷新</span></button>
+    <a class="btn" href="data/latest.json" target="_blank" rel="noopener">原始 JSON</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-top">
+      <div>
+        <h1>监测服务日志</h1>
+        <p class="sub">最近一次自动探测结果 · 数据源 <code>data/latest.json</code></p>
+      </div>
+      <div class="date-pill">运行时间 <b id="runDate">加载中…</b></div>
+    </div>
+    <div class="score">
+      <div class="score-num ok" id="scoreNum">--</div>
+      <div class="score-label" id="scoreLabel">探测项通过率</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">检查项</div><div class="v" id="statTotal">--</div></div>
+      <div class="stat"><div class="k">正常</div><div class="v ok" id="statOk">--</div></div>
+      <div class="stat"><div class="k">异常</div><div class="v" id="statBad">--</div></div>
+      <div class="stat"><div class="k">调度</div><div class="v" style="font-size:14px">青龙 · 每 8 小时</div></div>
+    </div>
+  </section>
+
+  <h2>按工具汇总</h2>
+  <div class="cards" id="toolCards"><div class="loading">加载中…</div></div>
+
+  <h2>检查明细</h2>
+  <div class="wrap">
+    <table>
+      <thead><tr><th>工具</th><th>检查项</th><th>结果</th><th>说明</th></tr></thead>
+      <tbody id="detailBody"><tr><td colspan="4" class="loading">加载中…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="note"><b>口径说明：</b>分母固定为 10 项（地址文件 2 + 端点 8）；签到 NAS 端与验证码工具不占分母，只在青龙任务日志里旁路体现。本页读取的是最近一次快照，打开页面时不会重新探测。</div>
+
+  <details>
+    <summary>查看原始 JSON（排障用）</summary>
+    <pre id="rawJson">加载中…</pre>
+  </details>
+</main>
+
+<footer class="site-footer"><span data-build>v1.0 · 2026-11-25 13:05</span></footer>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){return document.getElementById(id);};
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function parseSummary(s){
+    var m = /^(\d+)\s*\/\s*(\d+)$/.exec(String(s || '').trim());
+    return m ? {ok:+m[1], total:+m[2]} : {ok:0, total:0};
+  }
+  function splitItem(item){
+    var p = String(item || '').split('-');
+    return {tool: p[0] || '未分类', sub: p.length > 1 ? p.slice(1).join('-') : ''};
+  }
+  function setError(msg){
+    $('runDate').textContent = '不可用';
+    $('scoreNum').textContent = '--';
+    $('scoreNum').className = 'score-num bad';
+    $('scoreLabel').textContent = msg;
+    $('statTotal').textContent = $('statOk').textContent = $('statBad').textContent = '--';
+    $('toolCards').innerHTML = '<div class="loading">' + esc(msg) + '</div>';
+    $('detailBody').innerHTML = '<tr><td colspan="4" class="loading">' + esc(msg) + '</td></tr>';
+    $('rawJson').textContent = msg;
+  }
+  function render(d){
+    var results = Array.isArray(d.results) ? d.results : [];
+    var sm = parseSummary(d.summary);
+    var okN = results.filter(function(r){return r && r.ok;}).length;
+    var total = results.length;
+    if(!total && sm.total){ total = sm.total; okN = sm.ok; }
+    $('runDate').textContent = d.date || '未知时间';
+    $('scoreNum').textContent = (okN === total ? '✓ ' : '! ') + okN + '/' + total;
+    $('scoreNum').className = 'score-num ' + (okN === total ? 'ok' : 'bad');
+    $('scoreLabel').textContent = okN === total ? '全部探测项正常' : (total - okN) + ' 项异常，请查看明细';
+    $('statTotal').textContent = total;
+    $('statOk').textContent = okN;
+    $('statBad').textContent = Math.max(total - okN, 0);
+    $('statBad').className = 'v ' + (okN === total ? '' : 'bad');
+
+    var groups = {};
+    results.forEach(function(r){
+      var x = splitItem(r && r.item);
+      if(!groups[x.tool]) groups[x.tool] = {ok:true, notes:[], count:0};
+      groups[x.tool].count++;
+      if(!(r && r.ok)){
+        groups[x.tool].ok = false;
+        groups[x.tool].notes.push((x.sub ? x.sub + '：' : '') + ((r && r.detail) || '异常'));
+      }
+    });
+    var names = Object.keys(groups);
+    $('toolCards').innerHTML = names.length ? names.map(function(name){
+      var g = groups[name];
+      return '<div class="tool">' +
+        '<div class="tool-head"><span class="tool-name">' + esc(name) + '</span>' +
+        '<span class="badge ' + (g.ok ? 'ok' : 'bad') + '">' + (g.ok ? '正常' : '异常') + '</span></div>' +
+        '<div class="cnt">' + g.count + ' 个检查项 · ' + (g.ok ? '全部通过' : '存在异常') + '</div>' +
+        (g.ok ? '' : '<div class="notes">' + esc(g.notes.join('；')) + '</div>') +
+        '</div>';
+    }).join('') : '<div class="loading">暂无检查项</div>';
+
+    $('detailBody').innerHTML = results.length ? results.map(function(r){
+      var x = splitItem(r && r.item);
+      var ok = !!(r && r.ok);
+      return '<tr>' +
+        '<td>' + esc(x.tool) + '</td>' +
+        '<td>' + esc(x.sub || (r && r.item) || '-') + '</td>' +
+        '<td class="' + (ok ? 'ok-t' : 'bad-t') + '"><span class="dot ' + (ok ? 'ok' : 'bad') + '"></span>' + (ok ? '正常' : '异常') + '</td>' +
+        '<td class="' + (ok ? 'muted-t' : 'bad-t') + '">' + esc((r && r.detail) || (ok ? '' : '异常')) + '</td>' +
+        '</tr>';
+    }).join('') : '<tr><td colspan="4" class="loading">暂无检查项</td></tr>';
+
+    $('rawJson').textContent = JSON.stringify(d, null, 2);
+  }
+  function load(){
+    $('toolCards').innerHTML = '<div class="loading">加载中…</div>';
+    $('detailBody').innerHTML = '<tr><td colspan="4" class="loading">加载中…</td></tr>';
+    fetch('data/latest.json?t=' + Date.now(), {cache:'no-store'})
+      .then(function(r){return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status));})
+      .then(render)
+      .catch(function(e){setError('读取监测数据失败：' + (e && e.message ? e.message : e));});
+  }
+  $('reloadBtn').addEventListener('click', load);
+  load();
+})();
+</script>
+</body>
+</html>
