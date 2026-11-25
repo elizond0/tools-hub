@@ -6,14 +6,15 @@
 <title>我的工具站 · 统一入口</title>
 <style>
   :root{
-    --bg:#0e1014; --card:#181b21; --card2:#21252e; --line:#2b303b;
-    --fg:#e9ebf1; --muted:#98a1b2; --ok:#3bc887; --bad:#e5484d; --warn:#e5a53c; --accent:#6ea8fe;
+    --bg:#f6f7fb; --card:#ffffff; --card2:#f1f3f8; --line:#e3e7ef;
+    --fg:#1f2736; --muted:#6b7280; --ok:#16845b; --bad:#d64045; --warn:#bd7a13; --accent:#4f6ef7;
+    --shadow:0 2px 12px rgba(31,39,54,.05);
   }
   *{box-sizing:border-box}
   html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);
     font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
   header{height:56px;display:flex;align-items:center;gap:18px;padding:0 18px;
-    border-bottom:1px solid var(--line);background:#14171c;position:sticky;top:0;z-index:10}
+    border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:10}
   .brand{font-weight:700;font-size:16px;letter-spacing:.3px;white-space:nowrap}
   .brand span{color:var(--accent)}
   nav{display:flex;gap:6px;flex:1;overflow-x:auto}
@@ -22,57 +23,70 @@
     text-decoration:none}
   .tab:hover{background:var(--card2);color:var(--fg)}
   .tab.active{background:var(--card2);color:var(--fg);border-color:var(--line)}
-  .tab .d{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
+  .tab .d{width:7px;height:7px;border-radius:50%;background:#b9c0cc;flex:none}
   .tab .d.ok{background:var(--ok)} .tab .d.bad{background:var(--bad)} .tab .d.warn{background:var(--warn)}
-  .right{display:flex;align-items:center;gap:12px;white-space:nowrap}
-  #liveDot{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block}
-  #liveDot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(59,200,135,.12)}
-  #liveDot.bad{background:var(--bad)}
-  #liveText{font-size:12px;color:var(--muted)}
-  .ext{font-size:12px;color:var(--muted);text-decoration:none;padding:6px 10px;border:1px solid var(--line);border-radius:7px}
-  .ext:hover{border-color:var(--accent);color:var(--fg)}
+  .right{display:flex;align-items:center;gap:12px;white-space:nowrap;margin-left:auto}
+  .ext{font-size:12px;color:var(--muted);text-decoration:none;padding:6px 10px;border:1px solid var(--line);
+    border-radius:7px;background:var(--card)}
+  .ext:hover{border-color:var(--accent);color:var(--accent);background:var(--card2)}
   main{padding:26px;max-width:900px;margin:0 auto}
-  h2{font-size:20px;margin:0 0 14px}
+  h2{font-size:20px;margin:0 0 8px}
+  .subline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:18px}
+  .status{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:4px 11px;color:var(--muted);box-shadow:var(--shadow)}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--warn);flex:none}
+  .status-dot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(22,132,91,.14)}
+  .status-dot.bad{background:var(--bad);box-shadow:0 0 0 3px rgba(214,64,69,.12)}
+  .sep{color:#c2c8d2}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:18px 0 30px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;transition:.15s;
-    text-decoration:none;color:inherit;display:block}
-  .card:hover{border-color:var(--accent);transform:translateY(-2px)}
-  .card.disabled{cursor:default;opacity:.7}
-  .card.disabled:hover{border-color:var(--line);transform:none}
+    text-decoration:none;color:inherit;display:block;box-shadow:var(--shadow)}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 18px rgba(79,110,247,.10)}
+  .card.disabled{cursor:default;opacity:.75}
+  .card.disabled:hover{border-color:var(--line);transform:none;box-shadow:var(--shadow)}
   .card .n{font-weight:650;font-size:15px;margin-bottom:6px}
   .card .n::after{content:" ↗";font-size:12px;color:var(--muted)}
   .card.disabled .n::after{content:""}
   .card .t{color:var(--muted);font-size:12px}
-  table{width:100%;border-collapse:collapse;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden}
   th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
-  th{color:var(--muted);font-weight:500}
+  th{color:var(--muted);font-weight:500;background:var(--card2)}
+  tr:last-child td{border-bottom:0}
   .ok-t{color:var(--ok)} .bad-t{color:var(--bad)} .muted-t{color:var(--muted)}
   .note{background:var(--card);border-left:3px solid var(--accent);border-radius:8px;padding:12px 14px;
-    color:var(--muted);font-size:12px;margin-top:20px}
+    color:var(--muted);font-size:12px;margin-top:20px;box-shadow:var(--shadow)}
   .note b{color:var(--fg)}
   code{background:var(--card2);padding:1px 5px;border-radius:4px;font-size:11px}
   .site-footer{max-width:900px;margin:0 auto;padding:14px 26px 26px;color:var(--muted);font-size:11px;text-align:center}
-  @media(max-width:720px){.brand{font-size:14px}#liveText{display:none}.ext{display:none}}
+  @media(max-width:720px){
+    .brand{font-size:14px}.ext{display:none}.right{display:none}
+    .subline{align-items:flex-start}.status{margin-bottom:2px}
+    main{padding:20px 14px}.card{padding:14px}
+  }
 </style>
 </head>
 <body>
 <header>
   <div class="brand">我的<span>工具站</span></div>
   <nav id="nav">
-    <a class="tab active" href="index.html"><span class="d ok"></span>总览</a>
+    <a class="tab active" href="index.html">总览</a>
     <a class="tab" href="https://elizond0.github.io/album/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/album/"><span class="d"></span>相册</a>
     <a class="tab" href="https://elizond0.github.io/pdf-tools/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/pdf-tools/"><span class="d"></span>PDF</a>
     <a class="tab" href="https://elizond0.github.io/smzdm-daily/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/smzdm-daily/"><span class="d"></span>值得买</a>
     <a class="tab" href="https://elizond0.github.io/gelianghao/" target="_blank" rel="noopener" data-page="https://elizond0.github.io/gelianghao/"><span class="d"></span>哥俩好</a>
   </nav>
   <div class="right">
-    <span id="liveDot"></span><span id="liveText">探测中…</span>
     <a class="ext" href="monitor.html" target="_blank">监测数据</a>
   </div>
 </header>
 <main>
   <h2>六个自建工具 · 统一入口</h2>
-  <div class="muted-t" style="font-size:13px">点击页签或卡片在新标签页直接进入对应工具（原站点内容，不作改动）；本页打开时实时探测各入口。</div>
+  <div class="subline">
+    <span class="status"><span id="liveDot" class="status-dot"></span><span id="liveText">探测中…</span></span>
+    <span class="sep">·</span>
+    <span>点击页签或卡片在新标签页直接进入对应工具（原站点内容，不作改动）；本页打开时实时探测各入口。</span>
+  </div>
   <div class="grid">
     <a class="card" href="https://elizond0.github.io/album/" target="_blank" rel="noopener"><div class="n">相册展示</div><div class="t">NAS 直链相册 · Pages 前端 + 隧道后端</div></a>
     <a class="card" href="https://elizond0.github.io/pdf-tools/" target="_blank" rel="noopener"><div class="n">PDF 工具站</div><div class="t">纯前端 PDF + NAS 增强</div></a>
@@ -86,7 +100,7 @@
     <tbody id="snapBody"><tr><td colspan="3" class="muted-t">加载中…</td></tr></tbody></table>
   <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，右上角「监测数据」可查看日志页，实时探测在打开本页时进行。</div>
 </main>
-<footer class="site-footer"><span data-build>v1.3 · 2026-11-25 13:05</span></footer>
+<footer class="site-footer"><span data-build>v1.4 · 2026-11-25 15:10</span></footer>
 <script>
 (function(){
   const nav=[...document.querySelectorAll('.tab')];
@@ -100,7 +114,7 @@
       .then(()=>{done++;ok++;d.className='d ok';})
       .catch(()=>{done++;d.className='d bad';})
       .finally(()=>{if(done===tabs.length){
-        dot.className= ok===tabs.length?'ok':(ok===0?'bad':'');
+        dot.className= ok===tabs.length?'status-dot ok':(ok===0?'status-dot bad':'status-dot');
         txt.textContent=`实时 ${ok}/${tabs.length} 入口可达`;
       }});
   });
