@@ -140,21 +140,23 @@
     <table><thead><tr><th>工具名</th><th>结果</th><th>说明</th></tr></thead>
       <tbody id="snapBody"><tr><td colspan="3" class="muted-t">加载中…</td></tr></tbody></table>
   </section>
-  <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，<a href="monitor.html" target="_blank">查看监测日志</a>可查历史记录，实时探测在打开本页时进行。</div>
+  <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，<a href="monitor.html" target="_blank">查看监测日志</a>可查历史记录，实时探测在打开本页时进行，按真实 HTTP 状态判定（404/503 计为不可达）。</div>
 </main>
-<footer class="site-footer"><span data-build>v1.6 · 2026-11-25 22:10</span></footer>
+<footer class="site-footer"><span data-build>v1.7 · 2026-11-25 23:35</span></footer>
 <script>
 (function(){
   const nav=[...document.querySelectorAll('.tab')];
-  // 实时探测四个入口（no-cors opaque 即视为网络可达）
+  // 实时探测四个入口：GitHub Pages 带 access-control-allow-origin:*，
+  // 用标准 cors fetch 能读到真实状态码；no-cors 的 opaque 会把 404 也当成可达，已弃用。
+  // 判定口径：HTTP 2xx/3xx = 可达；404/503/网络失败 = 不可达。
   const tabs=nav.filter(t=>t.dataset.page);
   let done=0, ok=0;
   const dot=document.getElementById('liveDot'), txt=document.getElementById('liveText');
   tabs.forEach(t=>{
-    fetch(t.dataset.page+'?t='+Date.now(),{mode:'no-cors',cache:'no-store'})
-      .then(()=>{done++;ok++;})
-      .catch(()=>{done++;})
-      .finally(()=>{if(done===tabs.length){
+    fetch(t.dataset.page+'?t='+Date.now(),{cache:'no-store',redirect:'follow'})
+      .then(r=>{ if(r.ok) ok++; })
+      .catch(()=>{})
+      .finally(()=>{ if(++done===tabs.length){
         dot.className= ok===tabs.length?'status-dot ok':(ok===0?'status-dot bad':'status-dot');
         txt.textContent=`实时 ${ok}/${tabs.length} 入口可达`;
       }});
