@@ -44,6 +44,20 @@
   .stat .v.ok{color:var(--ok)} .stat .v.bad{color:var(--bad)}
   h2{font-size:17px;margin:28px 0 12px;display:flex;align-items:center;gap:9px}
   h2::before{content:"";width:3px;height:16px;background:var(--accent);border-radius:2px}
+  .hist-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .hist-meta{color:var(--muted);font-size:12px}
+  .hist-list{display:flex;flex-direction:column;gap:8px;max-height:268px;overflow:auto;padding-right:4px}
+  .hist-item{display:flex;align-items:center;gap:12px;text-align:left;width:100%;cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 13px;
+    font:inherit;color:var(--fg);box-shadow:var(--shadow)}
+  .hist-item:hover{border-color:var(--accent)}
+  .hist-item.active{border-color:var(--accent);background:rgba(79,110,247,.07)}
+  .hist-time{font-size:13px;font-weight:600;white-space:nowrap}
+  .hist-badge{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--card2);color:var(--muted);white-space:nowrap}
+  .hist-res{margin-left:auto;font-size:12px;font-weight:650;white-space:nowrap}
+  .hist-res.ok{color:var(--ok)} .hist-res.bad{color:var(--bad)}
+  .hist-empty{padding:18px;text-align:center;color:var(--muted);font-size:13px;
+    background:var(--card);border:1px solid var(--line);border-radius:10px}
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
   .tool{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 16px;box-shadow:var(--shadow)}
   .tool-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -77,6 +91,7 @@
     header{gap:10px;padding:0 12px}.brand{font-size:14px}.head-right .btn span{display:none}
     main{padding:22px 14px 34px}.hero{padding:18px}.score-num{font-size:34px}
     th,td{padding:9px 10px;font-size:12px}
+    .hist-time{font-size:12px}.hist-badge{display:none}
   }
 </style>
 </head>
@@ -85,7 +100,7 @@
   <div class="brand">我的<span>工具站</span></div>
   <div class="head-right">
     <a class="btn" href="index.html">← 返回总览</a>
-    <button class="btn primary" id="reloadBtn" type="button" title="重新读取最新快照">↻ <span>刷新</span></button>
+    <button class="btn primary" id="reloadBtn" type="button" title="重新读取历史与最新快照">↻ <span>刷新</span></button>
     <a class="btn" href="data/latest.json" target="_blank" rel="noopener">原始 JSON</a>
   </div>
 </header>
@@ -95,7 +110,7 @@
     <div class="hero-top">
       <div>
         <h1>监测服务日志</h1>
-        <p class="sub">最近一次自动探测结果 · 数据源 <code>data/latest.json</code></p>
+        <p class="sub">历次自动探测记录 · 默认显示最新一次 · 数据源 <code>data/history.json</code></p>
       </div>
       <div class="date-pill">运行时间 <b id="runDate">加载中…</b></div>
     </div>
@@ -111,6 +126,13 @@
     </div>
   </section>
 
+  <h2>历史记录</h2>
+  <div class="hist-head">
+    <div class="hist-meta" id="histMeta">加载中…</div>
+    <a class="btn" href="data/history.json" target="_blank" rel="noopener">历史 JSON</a>
+  </div>
+  <div class="hist-list" id="historyList"><div class="hist-empty">加载中…</div></div>
+
   <h2>按工具汇总</h2>
   <div class="cards" id="toolCards"><div class="loading">加载中…</div></div>
 
@@ -122,20 +144,21 @@
     </table>
   </div>
 
-  <div class="note"><b>口径说明：</b>分母固定为 10 项（地址文件 2 + 端点 8）；签到 NAS 端与验证码工具不占分母，只在青龙任务日志里旁路体现。本页读取的是最近一次快照，打开页面时不会重新探测。</div>
+  <div class="note"><b>口径说明：</b>分母固定为 10 项（地址文件 2 + 端点 8）；签到 NAS 端与验证码工具不占分母，只在青龙任务日志里旁路体现。上方区域显示当前选中那次探测的明细，本页不会重新探测。</div>
 
   <details>
-    <summary>查看原始 JSON（排障用）</summary>
+    <summary>查看当前选中记录的原始 JSON（排障用）</summary>
     <pre id="rawJson">加载中…</pre>
   </details>
 </main>
 
-<footer class="site-footer"><span data-build>v1.1 · 2026-11-25 15:10</span></footer>
+<footer class="site-footer"><span data-build>v1.2 · 2026-11-25 20:50</span></footer>
 
 <script>
 (function(){
   'use strict';
   var $ = function(id){return document.getElementById(id);};
+  var state = {records: [], selected: null};
   function esc(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
@@ -149,22 +172,66 @@
     var p = String(item || '').split('-');
     return {tool: p[0] || '未分类', sub: p.length > 1 ? p.slice(1).join('-') : ''};
   }
+  function counts(rec){
+    var sm = parseSummary(rec && rec.summary);
+    var rs = Array.isArray(rec && rec.results) ? rec.results : [];
+    var okN = rs.filter(function(r){return r && r.ok;}).length;
+    var total = rs.length;
+    if(!total && sm.total){ total = sm.total; okN = sm.ok; }
+    return {ok: okN, total: total};
+  }
   function setError(msg){
     $('runDate').textContent = '不可用';
     $('scoreNum').textContent = '--';
     $('scoreNum').className = 'score-num bad';
     $('scoreLabel').textContent = msg;
     $('statTotal').textContent = $('statOk').textContent = $('statBad').textContent = '--';
+    $('histMeta').textContent = msg;
+    $('historyList').innerHTML = '<div class="hist-empty">' + esc(msg) + '</div>';
     $('toolCards').innerHTML = '<div class="loading">' + esc(msg) + '</div>';
     $('detailBody').innerHTML = '<tr><td colspan="4" class="loading">' + esc(msg) + '</td></tr>';
     $('rawJson').textContent = msg;
   }
+  function renderHistory(){
+    var list = $('historyList');
+    if(!state.records.length){
+      $('histMeta').textContent = '暂无历史记录';
+      list.innerHTML = '<div class="hist-empty">暂无历史记录</div>';
+      return;
+    }
+    var first = state.records[0], last = state.records[state.records.length - 1];
+    $('histMeta').textContent = '共 ' + state.records.length + ' 次记录 · 最早 ' +
+      (first.date || '未知') + ' · 最新 ' + (last.date || '未知') + ' · 点击任一次查看当时明细';
+    var sorted = state.records.slice().reverse();
+    list.innerHTML = sorted.map(function(rec){
+      var c = counts(rec);
+      var active = state.selected && rec.date === state.selected.date;
+      var bad = Math.max(c.total - c.ok, 0);
+      return '<button type="button" class="hist-item' + (active ? ' active' : '') + '" data-date="' + esc(rec.date) + '">' +
+        '<span class="hist-time">' + esc(rec.date || '未知时间') + '</span>' +
+        '<span class="hist-badge">' + (bad ? bad + ' 项异常' : '全部正常') + '</span>' +
+        '<span class="hist-res ' + (bad ? 'bad' : 'ok') + '">' + (bad ? '! ' : '✓ ') + c.ok + '/' + c.total + '</span>' +
+        '</button>';
+    }).join('');
+    Array.prototype.forEach.call(list.querySelectorAll('.hist-item'), function(btn){
+      btn.addEventListener('click', function(){
+        var d = btn.getAttribute('data-date');
+        var rec = null;
+        state.records.some(function(r){ if(r.date === d){ rec = r; return true; } return false; });
+        if(!rec) return;
+        state.selected = rec;
+        if(window.history && window.history.replaceState){
+          window.history.replaceState(null, '', location.pathname + '#' + encodeURIComponent(d));
+        }
+        renderHistory();
+        render(rec);
+      });
+    });
+  }
   function render(d){
     var results = Array.isArray(d.results) ? d.results : [];
-    var sm = parseSummary(d.summary);
-    var okN = results.filter(function(r){return r && r.ok;}).length;
-    var total = results.length;
-    if(!total && sm.total){ total = sm.total; okN = sm.ok; }
+    var c = counts(d);
+    var okN = c.ok, total = c.total;
     $('runDate').textContent = d.date || '未知时间';
     $('scoreNum').textContent = (okN === total ? '✓ ' : '! ') + okN + '/' + total;
     $('scoreNum').className = 'score-num ' + (okN === total ? 'ok' : 'bad');
@@ -208,15 +275,54 @@
 
     $('rawJson').textContent = JSON.stringify(d, null, 2);
   }
+  function pickFromHash(){
+    var raw = (location.hash || '').replace(/^#/, '');
+    if(!raw) return null;
+    var target = raw;
+    try { target = decodeURIComponent(raw); } catch(e) {}
+    var found = null;
+    state.records.some(function(r){ if(r.date === target){ found = r; return true; } return false; });
+    return found;
+  }
+  function fallbackLatest(msg){
+    return fetch('data/latest.json?t=' + Date.now(), {cache:'no-store'})
+      .then(function(r){return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status));})
+      .then(function(d){
+        state.records = [d];
+        state.selected = d;
+        $('histMeta').textContent = (msg || '历史文件不可用') + ' · 当前仅显示最近一次快照（' + (d.date || '未知时间') + '）';
+        $('historyList').innerHTML = '<div class="hist-empty">历史记录暂不可用，待下次青龙任务成功写入后即可查询。</div>';
+        render(d);
+      });
+  }
   function load(){
+    state.records = []; state.selected = null;
+    $('histMeta').textContent = '加载中…';
+    $('historyList').innerHTML = '<div class="hist-empty">加载中…</div>';
     $('toolCards').innerHTML = '<div class="loading">加载中…</div>';
     $('detailBody').innerHTML = '<tr><td colspan="4" class="loading">加载中…</td></tr>';
-    fetch('data/latest.json?t=' + Date.now(), {cache:'no-store'})
+    fetch('data/history.json?t=' + Date.now(), {cache:'no-store'})
       .then(function(r){return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status));})
-      .then(render)
+      .then(function(j){
+        var arr = Array.isArray(j) ? j : (j && Array.isArray(j.records) ? j.records : []);
+        if(!arr.length) throw new Error('历史记录为空');
+        state.records = arr;
+        state.selected = pickFromHash() || arr[arr.length - 1];
+        renderHistory();
+        render(state.selected);
+      })
+      .catch(function(e){
+        var msg = '历史文件不可用（' + (e && e.message ? e.message : e) + '）';
+        return fallbackLatest(msg);
+      })
       .catch(function(e){setError('读取监测数据失败：' + (e && e.message ? e.message : e));});
   }
   $('reloadBtn').addEventListener('click', load);
+  window.addEventListener('hashchange', function(){
+    if(!state.records.length) return;
+    var rec = pickFromHash();
+    if(rec){ state.selected = rec; renderHistory(); render(rec); }
+  });
   load();
 })();
 </script>
