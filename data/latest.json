@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-25 21:02",
-  "summary": "10/10",
+  "date": "2026-11-26 00:00",
+  "summary": "8/10",
   "results": [
     {
       "item": "相册展示-地址文件(base/nas.json)",
@@ -10,7 +10,7 @@
     {
       "item": "PDF工具-地址文件(base/nas.json)",
       "ok": true,
-      "detail": "地址=https://accommodation-contacting-alert-scanned.trycloudflare.com"
+      "detail": "地址=https://mothers-hero-troy-reflects.trycloudflare.com"
     },
     {
       "item": "相册展示-隧道 /api/health",
@@ -24,8 +24,8 @@
     },
     {
       "item": "PDF工具-隧道门禁(无key)",
-      "ok": true,
-      "detail": "HTTP 403"
+      "ok": false,
+      "detail": "HTTP 404"
     },
     {
       "item": "PDF工具-隧道预检(OPTIONS)",
@@ -34,8 +34,8 @@
     },
     {
       "item": "相册展示-前端",
-      "ok": true,
-      "detail": "HTTP 200"
+      "ok": false,
+      "detail": "HTTP 503"
     },
     {
       "item": "PDF工具-前端",
