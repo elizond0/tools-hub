@@ -38,6 +38,7 @@ PAGES = {
     'PDF工具-前端': 'https://elizond0.github.io/pdf-tools/',
     '什么值得买-入口': 'https://elizond0.github.io/smzdm-daily/',
     '哥俩好小游戏-入口': 'https://elizond0.github.io/gelianghao/',
+    '回形针游戏-入口': 'https://elizond0.github.io/paperclip-max/',
 }
 NAS_KEY = 'pk_38b17a8712c561e6cd80b9d1'
 REPO = 'elizond0/tools-hub'
