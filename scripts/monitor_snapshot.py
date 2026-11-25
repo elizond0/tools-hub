@@ -9,8 +9,9 @@
   1. 只读探测，不登录 NAS、不改服务、不碰隧道配置。
   2. 隧道地址现读 GitHub 上的 base.json / nas.json，不写死 trycloudflare 域名。
   3. 判活看实际端点，不看地址文件 updated 时间。
-  4. 唯一写操作：把快照 PUT 到 GitHub 仓库 tools-hub 的 data/latest.json。
-     PAT 从环境变量 GH_PAT_TOOLSHUB 读取，不写死在脚本里、不打印。
+  4. 写操作：把快照 PUT 到 GitHub 仓库 tools-hub 的 data/latest.json，
+     并追加一条记录到 data/history.json 供入口站日志页查询历史。
+     历史写入失败只告警，不影响主快照；PAT 从环境变量 GH_PAT_TOOLSHUB 读取，不打印。
 
 环境变量（青龙「环境变量」里配置，脚本本身不含任何密钥）：
   GH_PAT_TOOLSHUB  GitHub PAT（需对 elizond0/tools-hub 有 push 权限）
@@ -20,7 +21,7 @@
 
 退出码：0 正常 / 1 探测到异常 / 2 脚本自身异常（含缺密钥、写 GitHub 失败）
 """
-import sys, json, os, datetime, urllib.request, urllib.error, ssl
+import sys, json, os, base64, datetime, urllib.request, urllib.error, ssl
 
 CTX = ssl.create_default_context()
 TIMEOUT = 20
@@ -41,6 +42,8 @@ PAGES = {
 NAS_KEY = 'pk_38b17a8712c561e6cd80b9d1'
 REPO = 'elizond0/tools-hub'
 PATH = 'data/latest.json'
+HISTORY_PATH = 'data/history.json'
+HISTORY_LIMIT = 240   # 每 8 小时 3 次 ≈ 80 天；超量丢最旧，控制文件体积
 
 
 def http(url, method='GET', headers=None, body=None, timeout=TIMEOUT):
@@ -152,29 +155,82 @@ def checkin_nas_today():
     return False, '无当天日志'
 
 
+def _api_url(path):
+    return 'https://api.github.com/repos/%s/contents/%s' % (REPO, path)
+
+
+def _auth_headers(pat):
+    return {'Authorization': 'Bearer ' + pat,
+            'Accept': 'application/vnd.github+json',
+            'User-Agent': 'tools-hub-monitor/1.0'}
+
+
+def _get_json_file(path, pat):
+    """读取仓库 JSON 文件，返回 (对象, sha)；404 返回 (None, '')。"""
+    st, b, _ = http(_api_url(path), headers=_auth_headers(pat), timeout=TIMEOUT)
+    if st == 404:
+        return None, ''
+    if st != 200:
+        raise RuntimeError('读取 %s 失败 HTTP %d' % (path, st))
+    j = json.loads(b.decode('utf-8'))
+    content = base64.b64decode(j.get('content', '')).decode('utf-8')
+    return json.loads(content), j.get('sha', '')
+
+
+def _put_json_file(path, obj, message, sha, pat):
+    """新建或更新仓库 JSON 文件。"""
+    content = base64.b64encode(json.dumps(obj, ensure_ascii=False, indent=2).encode('utf-8')).decode()
+    body_obj = {'message': message, 'content': content}
+    if sha:
+        body_obj['sha'] = sha
+    body = json.dumps(body_obj).encode('utf-8')
+    st, b, _ = http(_api_url(path), method='PUT', headers=_auth_headers(pat),
+                    body=body, timeout=TIMEOUT)
+    if st not in (200, 201):
+        raise RuntimeError('写入 %s 失败 HTTP %d: %s' % (
+            path, st, b.decode('utf-8', 'ignore')[:120]))
+
+
 def push_github(payload):
-    """把快照 PUT 到 GitHub。PAT 从环境变量读，不打印。"""
+    """把最新快照 PUT 到 GitHub（覆盖式）。PAT 从环境变量读，不打印。"""
     pat = os.environ.get('GH_PAT_TOOLSHUB', '').strip()
     if not pat:
         raise RuntimeError('缺环境变量 GH_PAT_TOOLSHUB')
-    api = 'https://api.github.com/repos/%s/contents/%s' % (REPO, PATH)
-    h = {'Authorization': 'Bearer ' + pat, 'Accept': 'application/vnd.github+json',
-         'User-Agent': 'tools-hub-monitor/1.0'}
-    # 先取 sha
-    st, b, _ = http(api, headers=h, timeout=TIMEOUT)
-    sha = ''
-    if st == 200:
-        sha = json.loads(b.decode('utf-8')).get('sha', '')
-    content = base64.b64encode(json.dumps(payload, ensure_ascii=False, indent=2).encode('utf-8')).decode()
-    body = json.dumps({'message': 'monitor: auto snapshot %s' % payload['date'],
-                       'content': content, 'sha': sha}).encode('utf-8')
-    st, b, _ = http(api, method='PUT', headers=h, body=body, timeout=TIMEOUT)
-    if st not in (200, 201):
-        raise RuntimeError('GitHub PUT 失败 HTTP %d: %s' % (st, b.decode('utf-8', 'ignore')[:120]))
+    _, sha = _get_json_file(PATH, pat)
+    _put_json_file(PATH, payload,
+                   'monitor: auto snapshot %s' % payload['date'], sha, pat)
     return True
 
 
-import base64
+def push_history(payload):
+    """把本次结果追加到历史文件。失败只告警，不影响主快照。"""
+    pat = os.environ.get('GH_PAT_TOOLSHUB', '').strip()
+    if not pat:
+        return False, '缺环境变量 GH_PAT_TOOLSHUB'
+    try:
+        old, sha = _get_json_file(HISTORY_PATH, pat)
+        if isinstance(old, dict):
+            records = old.get('records') if isinstance(old.get('records'), list) else []
+        elif isinstance(old, list):
+            records = old
+        else:
+            records = []
+        rec = {'date': payload['date'], 'summary': payload['summary'],
+               'results': payload['results']}
+        # 同一分钟重跑只保留最后一次，避免重复
+        records = [r for r in records if not (isinstance(r, dict) and r.get('date') == rec['date'])]
+        records.append(rec)
+        records = records[-HISTORY_LIMIT:]
+        obj = {'version': 1,
+               'updated': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+               'count': len(records),
+               'records': records}
+        _put_json_file(HISTORY_PATH, obj,
+                       'monitor: append history %s' % payload['date'], sha, pat)
+        return True, str(len(records))
+    except Exception as e:
+        return False, '%s: %s' % (type(e).__name__, e)
+
 
 def main():
     try:
@@ -201,6 +257,10 @@ def main():
     except Exception as e:
         print('推送 GitHub 失败：%s' % e, file=sys.stderr)
         return 2
+
+    hist_ok, hist_note = push_history(payload)
+    if not hist_ok:
+        print('历史记录写入失败（不影响本次快照）：%s' % hist_note, file=sys.stderr)
 
     print('快照已更新：%s  %s  %s' % (payload['date'], payload['summary'],
           '正常' if ok_n == total else '⚠️ %d 项异常' % (total - ok_n)))
