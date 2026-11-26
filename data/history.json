@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated": "2026-11-26 19:37:30",
-  "count": 13,
+  "updated": "2026-11-27 00:00:17",
+  "count": 14,
   "records": [
     {
       "date": "2026-11-23 21:20",
@@ -682,6 +682,67 @@
     },
     {
       "date": "2026-11-26 19:37",
+      "summary": "11/11",
+      "results": [
+        {
+          "item": "相册展示-地址文件(base/nas.json)",
+          "ok": true,
+          "detail": "地址=https://mothers-hero-troy-reflects.trycloudflare.com"
+        },
+        {
+          "item": "PDF工具-地址文件(base/nas.json)",
+          "ok": true,
+          "detail": "地址=https://accommodation-contacting-alert-scanned.trycloudflare.com"
+        },
+        {
+          "item": "相册展示-隧道 /api/health",
+          "ok": true,
+          "detail": "HTTP 200 body={\"ok\": true} ACAO=*"
+        },
+        {
+          "item": "相册展示-隧道 index.json 缓存头",
+          "ok": true,
+          "detail": "HTTP 200 cache-control=no-store"
+        },
+        {
+          "item": "PDF工具-隧道门禁(无key)",
+          "ok": true,
+          "detail": "HTTP 403"
+        },
+        {
+          "item": "PDF工具-隧道预检(OPTIONS)",
+          "ok": true,
+          "detail": "HTTP 204 ACAO=*"
+        },
+        {
+          "item": "相册展示-前端",
+          "ok": true,
+          "detail": "HTTP 200"
+        },
+        {
+          "item": "PDF工具-前端",
+          "ok": true,
+          "detail": "HTTP 200"
+        },
+        {
+          "item": "什么值得买-入口",
+          "ok": true,
+          "detail": "HTTP 200"
+        },
+        {
+          "item": "哥俩好小游戏-入口",
+          "ok": true,
+          "detail": "HTTP 200"
+        },
+        {
+          "item": "回形针游戏-入口",
+          "ok": true,
+          "detail": "HTTP 200"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-27 00:00",
       "summary": "11/11",
       "results": [
         {
