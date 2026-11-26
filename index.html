@@ -56,6 +56,15 @@
   .status-dot.bad{background:var(--bad);box-shadow:0 0 0 3px rgba(200,60,68,.14)}
   .sep{color:#aeb6c3}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(278px,1fr));gap:14px;margin:0 0 34px}
+  .group{margin:0 0 28px}
+  .group:last-child{margin-bottom:8px}
+  .group-head{display:flex;align-items:baseline;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+  .group-head h2{font-size:15px;margin:0;letter-spacing:.01em}
+  .group-head .gdesc{color:var(--muted);font-size:12px}
+  .group-head .gcount{color:var(--muted);font-size:11px;font-family:var(--font-mono);
+    background:var(--card2);border:1px solid var(--line-soft);border-radius:999px;padding:1px 8px}
+  .group-head::before{content:"";width:3px;height:15px;border-radius:2px;background:var(--accent);
+    opacity:.85;flex:none;transform:translateY(1px)}
   .card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:var(--radius-md);
     padding:18px;cursor:pointer;text-decoration:none;color:inherit;display:block;box-shadow:var(--shadow);
     min-height:88px;transition:transform var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
@@ -85,13 +94,14 @@
   @keyframes riseIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:no-preference){
     .main-head{animation:riseIn var(--dur) var(--ease) both}
-    .grid .card{animation:riseIn var(--dur) var(--ease) both}
-    .grid .card:nth-child(-n+2){animation-delay:80ms}
-    .grid .card:nth-child(n+3):nth-child(-n+4){animation-delay:160ms}
-    .grid .card:nth-child(n+5){animation-delay:240ms}
+    .group .card{animation:riseIn var(--dur) var(--ease) both}
+    .group:nth-child(1) .card{animation-delay:80ms}
+    .group:nth-child(2) .card{animation-delay:140ms}
+    .group:nth-child(3) .card{animation-delay:200ms}
+    .group:nth-child(4) .card{animation-delay:260ms}
     .snapshot,.note{animation:riseIn var(--dur) var(--ease) 320ms both}
   }
-  @media(max-width:720px){
+  @media (max-width:720px){
     header{gap:10px;padding:0 12px;min-height:56px}
     .brand{font-size:15px}
     .right{margin-left:0}
@@ -99,6 +109,8 @@
     main{padding:24px 14px}
     .subline{align-items:flex-start}
     .grid{grid-template-columns:1fr;gap:12px}
+    .group{margin-bottom:22px}
+    .group-head{margin-bottom:10px}
     .card{padding:15px;min-height:78px}
     th,td{padding:9px 10px}
   }
@@ -125,17 +137,37 @@
     <div class="subline">
       <span class="status" role="status" aria-live="polite"><span id="liveDot" class="status-dot"></span><span id="liveText">探测中…</span></span>
       <span class="sep">·</span>
-      <span>点击页签或卡片在新标签页直接进入对应工具（原站点内容，不作改动）；本页打开时实时探测各入口。</span>
+      <span>按用途分四组：游戏娱乐 / 办公效率 / 生活内容 / 自动化服务。点击页签或卡片在新标签页直接进入对应工具（原站点内容，不作改动）；本页打开时实时探测各入口。</span>
     </div>
   </div>
-  <div class="grid">
-    <a class="card" href="https://elizond0.github.io/album/" target="_blank" rel="noopener"><div class="n">相册展示</div><div class="t">NAS 直链相册 · Pages 前端 + 隧道后端</div></a>
-    <a class="card" href="https://elizond0.github.io/pdf-tools/" target="_blank" rel="noopener"><div class="n">PDF 工具站</div><div class="t">纯前端 PDF + NAS 增强</div></a>
-    <a class="card" href="https://elizond0.github.io/smzdm-daily/" target="_blank" rel="noopener"><div class="n">什么值得买</div><div class="t">每日好价日报 · 纯静态</div></a>
-    <a class="card" href="https://elizond0.github.io/gelianghao/" target="_blank" rel="noopener"><div class="n">哥俩好小游戏</div><div class="t">双人协作跳跃 · 纯静态</div></a>
-    <a class="card" href="https://elizond0.github.io/paperclip-max/" target="_blank" rel="noopener"><div class="n">回形针最大主义者</div><div class="t">增量放置游戏 · 纯静态</div></a>
-    <div class="card disabled" aria-disabled="true"><div class="n">workbuddy 签到</div><div class="t">云端 + NAS 青龙定时任务 · 无页面</div></div>
-    <div class="card disabled" aria-disabled="true"><div class="n">验证码工具</div><div class="t">TOTP 公共模块 · 无页面</div></div>
+  <div class="tools">
+    <section class="group" aria-labelledby="g-game">
+      <div class="group-head"><h2 id="g-game">游戏娱乐</h2><span class="gcount">2</span><span class="gdesc">纯前端小游戏，点开即玩</span></div>
+      <div class="grid">
+        <a class="card" href="https://elizond0.github.io/gelianghao/" target="_blank" rel="noopener"><div class="n">哥俩好小游戏</div><div class="t">双人协作跳跃 · 纯静态</div></a>
+        <a class="card" href="https://elizond0.github.io/paperclip-max/" target="_blank" rel="noopener"><div class="n">回形针最大主义者</div><div class="t">增量放置游戏 · 纯静态</div></a>
+      </div>
+    </section>
+    <section class="group" aria-labelledby="g-work">
+      <div class="group-head"><h2 id="g-work">办公效率</h2><span class="gcount">2</span><span class="gdesc">文档处理与验证码</span></div>
+      <div class="grid">
+        <a class="card" href="https://elizond0.github.io/pdf-tools/" target="_blank" rel="noopener"><div class="n">PDF 工具站</div><div class="t">纯前端 PDF + NAS 增强</div></a>
+        <div class="card disabled" aria-disabled="true"><div class="n">验证码工具</div><div class="t">TOTP 公共模块 · 无页面</div></div>
+      </div>
+    </section>
+    <section class="group" aria-labelledby="g-life">
+      <div class="group-head"><h2 id="g-life">生活内容</h2><span class="gcount">2</span><span class="gdesc">看图与看好价</span></div>
+      <div class="grid">
+        <a class="card" href="https://elizond0.github.io/album/" target="_blank" rel="noopener"><div class="n">相册展示</div><div class="t">NAS 直链相册 · Pages 前端 + 隧道后端</div></a>
+        <a class="card" href="https://elizond0.github.io/smzdm-daily/" target="_blank" rel="noopener"><div class="n">什么值得买</div><div class="t">每日好价日报 · 纯静态</div></a>
+      </div>
+    </section>
+    <section class="group" aria-labelledby="g-auto">
+      <div class="group-head"><h2 id="g-auto">自动化服务</h2><span class="gcount">1</span><span class="gdesc">后台定时任务，无独立页面</span></div>
+      <div class="grid">
+        <div class="card disabled" aria-disabled="true"><div class="n">workbuddy 签到</div><div class="t">云端 + NAS 青龙定时任务 · 无页面</div></div>
+      </div>
+    </section>
   </div>
   <section class="snapshot">
     <h2>监测快照 <span id="snapDate" class="muted-t" style="font:12px var(--font-body);font-weight:400"></span></h2>
@@ -144,7 +176,7 @@
   </section>
   <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，<a href="monitor.html" target="_blank">查看监测日志</a>可查历史记录，实时探测在打开本页时进行，按真实 HTTP 状态判定（404/503 计为不可达）。</div>
 </main>
-<footer class="site-footer"><span data-build>v1.8 · 2026-11-26 01:20</span></footer>
+<footer class="site-footer"><span data-build>v1.9 · 2026-11-27 00:20</span></footer>
 <script>
 (function(){
   const nav=[...document.querySelectorAll('.tab')];
