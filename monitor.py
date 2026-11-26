@@ -12,7 +12,7 @@
 监测对象（验证码工具不纳入：纯工具、无服务、无隧道）：
   - 相册展示 : Pages 前端 + 隧道 /api/health + index.json 的 no-store
   - pdf 工具 : Pages 前端 + 隧道门禁 403/204（带 key 则为 200）
-  - 静态站点 : 什么值得买 / 哥俩好 —— 仅作"工具入口展示"，检查 Pages 200
+  - 静态站点 : 什么值得买 / 哥俩好 / 回形针最大主义者 —— 仅作"工具入口展示"，检查 Pages 200
   - 签到     : 云端任务 15581633 由本任务单独核对 last_run；NAS 端青龙需登录，另记
 
 用法：
@@ -35,6 +35,7 @@ PAGES = {
     "PDF工具-前端": "https://elizond0.github.io/pdf-tools/",
     "什么值得买-入口": "https://elizond0.github.io/smzdm-daily/",
     "哥俩好小游戏-入口": "https://elizond0.github.io/gelianghao/",
+    "回形针游戏-入口": "https://elizond0.github.io/paperclip-max/",
 }
 ADDR_FILES = {
     "相册展示": "https://raw.githubusercontent.com/elizond0/album/main/base.json",
