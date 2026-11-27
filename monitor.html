@@ -68,6 +68,8 @@
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 13px;
     font:inherit;color:var(--fg);box-shadow:var(--shadow);min-height:44px;
     transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease)}
+  .hist-src{font:10px var(--font-mono);color:var(--accent);background:var(--accent-soft);
+    border:1px solid rgba(54,89,214,.22);border-radius:999px;padding:1px 7px;flex:none}
   .hist-item:hover{border-color:var(--accent)}
   .hist-item.active{border-color:var(--accent);background:var(--accent-soft)}
   .hist-time{font:600 13px var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -190,7 +192,7 @@
   </details>
 </main>
 
-<footer class="site-footer"><span data-build>v1.3 · 2026-11-25 22:10</span></footer>
+<footer class="site-footer"><span data-build>v1.4 · 2026-11-27 09:25</span></footer>
 
 <script>
 (function(){
@@ -247,6 +249,7 @@
       var bad = Math.max(c.total - c.ok, 0);
       return '<button type="button" class="hist-item' + (active ? ' active' : '') + '" data-date="' + esc(rec.date) + '">' +
         '<span class="hist-time">' + esc(rec.date || '未知时间') + '</span>' +
+        (rec.source === 'manual' ? '<span class="hist-src">手动</span>' : '') +
         '<span class="hist-badge">' + (bad ? bad + ' 项异常' : '全部正常') + '</span>' +
         '<span class="hist-res ' + (bad ? 'bad' : 'ok') + '">' + (bad ? '! ' : '✓ ') + c.ok + '/' + c.total + '</span>' +
         '</button>';
