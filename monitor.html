@@ -150,7 +150,7 @@
     <div class="hero-top">
       <div>
         <h1>监测服务日志</h1>
-        <p class="sub">历次自动探测记录 · 默认显示最新一次 · 数据源 <code>data/history.json</code></p>
+        <p class="sub">历次探测记录（定时 + 手动）· 默认显示最新一次 · 数据源 <code>data/history.json</code> + <code>data/manual/</code></p>
       </div>
       <div class="date-pill">运行时间 <b id="runDate">加载中…</b></div>
     </div>
@@ -192,7 +192,7 @@
   </details>
 </main>
 
-<footer class="site-footer"><span data-build>v1.4 · 2026-11-27 09:25</span></footer>
+<footer class="site-footer"><span data-build>v1.5 · 2026-11-27 10:42</span></footer>
 
 <script>
 (function(){
@@ -342,13 +342,38 @@
     $('historyList').innerHTML = '<div class="hist-empty">加载中…</div>';
     $('toolCards').innerHTML = '<div class="loading">加载中…</div>';
     $('detailBody').innerHTML = '<tr><td colspan="4" class="loading">加载中…</td></tr>';
-    fetch('data/history.json?t=' + Date.now(), {cache:'no-store'})
+    /* 定时快照和手动记录分开存（后端各写各的，避免两边抢同一个文件的
+       sha），这里合并成一条时间线。手动记录只预取最近 10 条——再往前翻的
+       需求很低，为它一次拉几十个文件不划算。 */
+    var histP = fetch('data/history.json?t=' + Date.now(), {cache:'no-store'})
       .then(function(r){return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status));})
-      .then(function(j){
-        var arr = Array.isArray(j) ? j : (j && Array.isArray(j.records) ? j.records : []);
-        if(!arr.length) throw new Error('历史记录为空');
-        state.records = arr;
-        state.selected = pickFromHash() || arr[arr.length - 1];
+      .then(function(j){ return Array.isArray(j) ? j : (j && Array.isArray(j.records) ? j.records : []); });
+
+    var manP = fetch('data/manual/index.json?t=' + Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .catch(function(){ return []; });
+
+    Promise.all([histP, manP])
+      .then(function(res){
+        var his = res[0] || [];
+        var idx = Array.isArray(res[1]) ? res[1] : [];
+        var top = idx.slice(0, 10);
+        if(!top.length) return his;
+        return Promise.all(top.map(function(e){
+          var p = typeof e === 'string' ? e : (e && e.path);
+          if(!p) return Promise.resolve(null);
+          return fetch(p + '?t=' + Date.now(), {cache:'no-store'})
+            .then(function(r){ return r.ok ? r.json() : null; })
+            .catch(function(){ return null; });
+        })).then(function(list){
+          return his.concat(list.filter(Boolean));
+        });
+      })
+      .then(function(all){
+        all.sort(function(a, b){ return String(a.date || '').localeCompare(String(b.date || '')); });
+        if(!all.length) throw new Error('历史记录为空');
+        state.records = all;
+        state.selected = pickFromHash() || all[all.length - 1];
         renderHistory();
         render(state.selected);
       })
