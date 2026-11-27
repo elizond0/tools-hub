@@ -152,6 +152,23 @@
   .probe-foot .sum b{color:var(--fg)}
   .copy-tip{font-size:11px;color:var(--ok);opacity:0;transition:opacity var(--dur) var(--ease)}
   .copy-tip.show{opacity:1}
+  /* ---------- 静默写入（动态码） ---------- */
+  .probe-write{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    padding:0 18px 14px}
+  .probe-write[hidden]{display:none}
+  .btn[hidden]{display:none}   /* .btn 自带 display:inline-flex，会盖掉 hidden 属性 */
+  .pw-code{width:124px;padding:8px 10px;font:13px var(--font-mono);
+    letter-spacing:.14em;background:#fff;color:var(--fg);outline:none;
+    border:1px solid var(--line);border-radius:8px;transition:border-color .2s,box-shadow .2s}
+  .pw-code::placeholder{letter-spacing:.02em;color:var(--muted)}
+  .pw-code:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(54,89,214,.12)}
+  .pw-code:disabled{background:var(--card2);color:var(--muted)}
+  .pw-alt{font-size:11px;color:var(--muted);text-decoration:underline}
+  .pw-alt:hover{color:var(--accent)}
+  .pw-msg{font-size:11.5px;line-height:1.6;color:var(--muted)}
+  .pw-msg.ok{color:var(--ok)}
+  .pw-msg.bad{color:var(--bad)}
+  @media (max-width:560px){.probe-write{padding:0 14px 14px}.pw-code{width:100%}}
   .probe-note{padding:0 18px 16px;font-size:11px;color:var(--muted);line-height:1.75;display:none}
   .probe-note.show{display:block}
   .probe-note code{background:var(--card2);padding:1px 5px;border-radius:4px;font:10px var(--font-mono)}
@@ -258,19 +275,28 @@
         <button type="button" class="btn ghost" id="probeAgain">再测一次</button>
         <span class="copy-tip" id="copyTip">已复制</span>
       </div>
+      <div class="probe-write" id="probeWrite" hidden>
+        <input class="pw-code" id="pwCode" type="text" inputmode="numeric" maxlength="8"
+               autocomplete="one-time-code" autocapitalize="off" autocorrect="off"
+               spellcheck="false" placeholder="6 位动态码" aria-label="6 位动态码">
+        <button type="button" class="btn" id="pwGo">确认写入</button>
+        <a class="pw-alt" id="pwAlt" href="#" target="_blank" rel="noopener">改用 GitHub 手动提交</a>
+        <span class="pw-msg" id="pwMsg" role="status" aria-live="polite"></span>
+      </div>
       <div class="probe-note" id="probeNote">
-        <b>怎么落进日志：</b>点「写入监测日志」打开 GitHub 新建文件页，文件名和内容都已填好，
-        选 <code>data/manual/</code> 目录提交即可。静态页在浏览器里没有仓库写权限，这一步必须你亲手点保存
-        ——本页是公开的，不能放密钥。<br>
-        <b>两者不互相覆盖：</b>手动记录存 <code>data/manual/</code>，不会改定时任务的 <code>latest.json</code>。
-        要让它出现在<a href="monitor.html" target="_blank">监测日志</a>里，是把这条记录合并进
-        <code>history.json</code> 的 <code>records</code>（写法见《部署必读》§6.2）。
+        <b>怎么落进日志：</b>点「写入监测日志」，输一次 6 位动态码，后端替你提交，不用跳 GitHub。
+        后端就是 NAS 上那台相册服务——复用它已经开好的隧道和动态码校验。动态码只在本机输入、
+        由服务端核验，<b>页面上不放任何密钥</b>（本页是公开的，放了等于泄露）。<br>
+        <b>写在哪：</b>手动记录存 <code>data/manual/</code>，不动定时任务的 <code>latest.json</code>，
+        也不改 <code>history.json</code>——三份数据各写各的，谁也不覆盖谁。
+        <a href="monitor.html" target="_blank">监测日志</a>会把手动记录和定时快照并排显示（带「手动」徽标）。<br>
+        <b>后端连不上时：</b>用右边的「改用 GitHub 手动提交」兜底，或点「复制结果」自己粘。
       </div>
     </div>
   </section>
   <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，<a href="monitor.html" target="_blank">查看监测日志</a>可查历史记录，实时探测在打开本页时进行，按真实 HTTP 状态判定（404/503 计为不可达）。</div>
 </main>
-<footer class="site-footer"><span data-build>v1.10 · 2026-11-27 09:25</span></footer>
+<footer class="site-footer"><span data-build>v1.11 · 2026-11-27 10:42</span></footer>
 <script>
 (function(){
   const nav=[...document.querySelectorAll('.tab')];
@@ -336,6 +362,9 @@
   var list = $('stepList'), fill = $('progFill'), pText = $('progText'), pPct = $('progPct');
   var goBtn = $('probeGo'), againBtn = $('probeAgain'), commitBtn = $('probeCommit'), copyBtn = $('probeCopy');
   var foot = $('probeFoot'), sumEl = $('probeSum'), note = $('probeNote'), tip = $('copyTip');
+  // 静默写入：动态码 → NAS 后端 → GitHub
+  var writeBox = $('probeWrite'), pwCode = $('pwCode'), pwGo = $('pwGo'),
+      pwAlt = $('pwAlt'), pwMsg = $('pwMsg'), PROBE_BASE = '', writing = false;
   var running = false, payload = null, stepEls = [];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
@@ -464,6 +493,7 @@
     payload = null;
     goBtn.disabled = true; goBtn.hidden = false;
     againBtn.hidden = true; commitBtn.disabled = true;
+    resetWrite();
     foot.classList.remove('show'); note.classList.remove('show'); tip.classList.remove('show');
     $('progWrap').hidden = false;
     fill.className = 'prog-fill'; fill.style.width = '0%';
@@ -556,19 +586,99 @@
   goBtn.addEventListener('click', runProbe);
   againBtn.addEventListener('click', runProbe);
 
+  /* ---------- 静默写入 ----------
+     后端地址取自相册站的 base.json（隧道会换域名，写死会失效）；本地调试用
+     ?probe=https://xxx 覆盖。 */
+  function loadProbeBase(){
+    if(PROBE_BASE) return Promise.resolve(PROBE_BASE);
+    var over;
+    try { over = new URLSearchParams(location.search).get('probe'); } catch(e){}
+    if(over){ PROBE_BASE = over.replace(/\/+$/, ''); return Promise.resolve(PROBE_BASE); }
+    return fetch('../album/base.json?t=' + Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        PROBE_BASE = String((j && j.base) || '').replace(/\/+$/, '');
+        return PROBE_BASE;
+      })
+      .catch(function(){ return ''; });
+  }
+
+  function resetWrite(){
+    writing = false;
+    writeBox.hidden = true;
+    writeBox.classList.remove('done');
+    pwCode.value = ''; pwCode.disabled = false;
+    pwGo.hidden = false; pwGo.disabled = false; pwGo.textContent = '确认写入';
+    pwMsg.textContent = ''; pwMsg.className = 'pw-msg';
+  }
+
   commitBtn.addEventListener('click', function(){
     if(!payload) return;
-    var url = commitUrl();
-    var w = window.open(url, '_blank', 'noopener');
-    if(!w){
-      showTip('弹窗被拦，请允许后重试', true);
+    if(!writeBox.hidden){
+      // 再点一次收起
+      writeBox.hidden = true;
       return;
     }
-    // 顺手把 JSON 也复制进剪贴板，万一 GitHub 预填失效可以直接粘贴
-    copyText(JSON.stringify(payload, null, 2) + '\n').then(function(ok){
-      if(!ok) fallbackCopy(JSON.stringify(payload, null, 2) + '\n');
-      showTip('已复制 JSON，可用作粘贴备份');
+    resetWrite();
+    writeBox.hidden = false;
+    pwAlt.href = commitUrl();          // 兜底：后端挂了还能走 GitHub
+    setTimeout(function(){ try { pwCode.focus(); } catch(e){} }, 60);
+  });
+
+  function doWrite(){
+    if(!payload || writing) return;
+    var code = (pwCode.value || '').trim();
+    if(!code){
+      pwMsg.className = 'pw-msg bad';
+      pwMsg.textContent = '先填动态码';
+      try { pwCode.focus(); } catch(e){}
+      return;
+    }
+    writing = true;
+    pwGo.disabled = true;
+    pwGo.textContent = '写入中…';
+    pwMsg.className = 'pw-msg';
+    pwMsg.textContent = '连接后端…';
+
+    loadProbeBase().then(function(base){
+      if(!base) throw new Error('读不到后端地址（相册站没响应）');
+      return fetch(base + '/api/manual-probe', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ code: code, record: payload })
+      });
+    }).then(function(r){
+      return r.json().then(function(j){ return {s: r.status, j: j}; },
+                           function(){ return {s: r.status, j: null}; });
+    }).then(function(o){
+      if(o.s === 200 && o.j && o.j.ok){
+        writing = false;
+        pwMsg.className = 'pw-msg ok';
+        pwMsg.textContent = '已写入 · ' + (payload.date || '') + ' · ' +
+                            (o.j.summary || '') + (o.j.commit ? ' · ' + o.j.commit : '') +
+                            (o.j.indexed === false ? '（索引没更新，日志页稍后自动补）' : '');
+        writeBox.classList.add('done');
+        pwCode.value = '';
+        pwCode.disabled = true;
+        pwGo.hidden = true;
+        return;
+      }
+      // 401 单独说清楚：不是网络问题，是码不对
+      if(o.s === 401) throw new Error('动态码不对，看一眼手机');
+      if(o.s === 429) throw new Error('点太快了，等一分钟再试');
+      throw new Error((o.j && o.j.error) || ('HTTP ' + o.s));
+    }).catch(function(e){
+      writing = false;
+      pwMsg.className = 'pw-msg bad';
+      pwMsg.textContent = '没写进去：' + e.message;
+      pwGo.disabled = false;
+      pwGo.textContent = '确认写入';
     });
+  }
+
+  pwGo.addEventListener('click', doWrite);
+  pwCode.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); doWrite(); }
   });
 
   copyBtn.addEventListener('click', function(){
