@@ -162,7 +162,7 @@
       <div class="stat"><div class="k">检查项</div><div class="v" id="statTotal">--</div></div>
       <div class="stat"><div class="k">正常</div><div class="v ok" id="statOk">--</div></div>
       <div class="stat"><div class="k">异常</div><div class="v" id="statBad">--</div></div>
-      <div class="stat"><div class="k">调度</div><div class="v" style="font-size:14px">青龙 · 每 8 小时</div></div>
+      <div class="stat"><div class="k">调度</div><div class="v" style="font-size:14px">青龙 · 每 8 小时</div><div class="k" style="margin-top:4px">+ 总览页手动写入</div></div>
     </div>
   </section>
 
@@ -184,7 +184,7 @@
     </table>
   </div>
 
-  <div class="note"><b>口径说明：</b>分母固定为 10 项（地址文件 2 + 端点 8）；签到 NAS 端与验证码工具不占分母，只在青龙任务日志里旁路体现。上方区域显示当前选中那次探测的明细，本页不会重新探测。</div>
+  <div class="note"><b>口径说明：</b>分母固定为 11 项（地址文件 2 + 隧道端点 4 + 页面入口 5）；签到 NAS 端与验证码工具不占分母，只在青龙任务里旁路体现。列表里带「手动」徽标的是在总览页点「写入监测日志」写进来的记录，与定时快照同口径、同一份历史；本页不会重新探测。<b>历史早于 2026-11-26 的记录写的是 10 项</b>（当时「回形针游戏-入口」还没纳入），属正常差异，不是漏测。</div>
 
   <details>
     <summary>查看当前选中记录的原始 JSON（排障用）</summary>
@@ -192,7 +192,7 @@
   </details>
 </main>
 
-<footer class="site-footer"><span data-build>v1.5 · 2026-11-27 10:42</span></footer>
+<footer class="site-footer"><span data-build>v1.6 · 2026-11-27 11:50</span></footer>
 
 <script>
 (function(){
