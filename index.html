@@ -88,9 +88,74 @@
     padding:13px 15px;color:var(--muted);font-size:12px;margin-top:20px;box-shadow:var(--shadow)}
   .note b{color:var(--fg)}
   .note a{color:var(--accent)}
-  code{background:var(--card2);padding:1px 5px;border-radius:4px;font:11px var(--font-mono)}
-  a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .site-footer{max-width:960px;margin:0 auto;padding:14px 26px 30px;color:var(--muted);font:11px var(--font-mono);text-align:center}
+
+
+  /* ---------- 手动探测 ---------- */
+  .probe{margin-top:26px;background:rgba(255,255,255,.94);border:1px solid var(--line);
+    border-radius:var(--radius-md);box-shadow:var(--shadow);overflow:hidden}
+  .probe-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:15px 18px;
+    border-bottom:1px solid var(--line-soft)}
+  .probe-head h2{font-size:15px;margin:0}
+  .probe-head .ph-sub{color:var(--muted);font-size:12px;flex:1;min-width:180px}
+  .btn{appearance:none;border:1px solid var(--accent);background:var(--accent);color:#fff;
+    border-radius:var(--radius-sm);padding:9px 16px;font:600 13px var(--font-body);cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;min-height:40px;
+    transition:background var(--dur) var(--ease),opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
+  .btn:hover{background:#2b49bd;transform:translateY(-1px)}
+  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .btn.ghost{background:var(--card);color:var(--accent);border-color:var(--line)}
+  .btn.ghost:hover{background:var(--accent-soft);border-color:var(--accent)}
+  .prog{padding:14px 18px 4px}
+  .prog-bar{height:6px;border-radius:999px;background:var(--card2);overflow:hidden}
+  .prog-fill{height:100%;width:0;border-radius:999px;background:var(--accent);
+    transition:width 380ms var(--ease),background var(--dur) var(--ease)}
+  .prog-fill.done{background:var(--ok)}
+  .prog-fill.has-bad{background:var(--bad)}
+  .prog-meta{display:flex;justify-content:space-between;align-items:baseline;
+    font:11px var(--font-mono);color:var(--muted);margin-top:7px;font-variant-numeric:tabular-nums}
+  .steps{list-style:none;margin:10px 0 0;padding:0 18px 16px}
+  /* 默认可见：动画只作增强。曾因 riseIn 依赖 prefers-reduced-motion 而整片不可见，
+     所以这里 opacity 基线固定为 1，进场效果交给下面的 media query 兜。 */
+  .step{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;
+    border-bottom:1px dashed var(--line-soft);opacity:1}
+  .step:last-child{border-bottom:0}
+  .step .ic{width:18px;height:18px;flex:none;border-radius:50%;display:inline-flex;
+    align-items:center;justify-content:center;font-size:11px;line-height:1;
+    background:var(--card2);color:var(--muted);border:1px solid var(--line)}
+  .step .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  @media (max-width:560px){
+    .step{flex-wrap:wrap;row-gap:2px}
+    .step .nm{white-space:normal;overflow:visible;text-overflow:clip;flex:1 1 auto}
+    .step .dt{max-width:100%;white-space:normal;overflow:visible;text-overflow:clip;
+      flex:1 1 100%;padding-left:28px;margin-top:-2px}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .step{animation:stepIn 240ms var(--ease) both}
+  }
+  @keyframes stepIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .step .dt{font:11px var(--font-mono);color:var(--muted);white-space:nowrap;max-width:46%;
+    overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+  .step.run .ic{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  .step.run .ic::after{content:"";width:8px;height:8px;border-radius:50%;border:2px solid var(--accent);
+    border-top-color:transparent;animation:spin 700ms linear infinite;box-sizing:border-box}
+  .step.ok .ic{background:var(--ok);border-color:var(--ok);color:#fff}
+  .step.ok .ic::after{content:"✓"}
+  .step.bad .ic{background:var(--bad);border-color:var(--bad);color:#fff}
+  .step.bad .ic::after{content:"✕"}
+  .step.ok .dt{color:var(--ok)}
+  .step.bad .dt{color:var(--bad)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .probe-foot{display:none;gap:10px;flex-wrap:wrap;align-items:center;padding:0 18px 14px}
+  .probe-foot.show{display:flex}
+  .probe-foot .sum{font:12px var(--font-mono);color:var(--muted);flex:1;min-width:150px;
+    font-variant-numeric:tabular-nums}
+  .probe-foot .sum b{color:var(--fg)}
+  .copy-tip{font-size:11px;color:var(--ok);opacity:0;transition:opacity var(--dur) var(--ease)}
+  .copy-tip.show{opacity:1}
+  .probe-note{padding:0 18px 16px;font-size:11px;color:var(--muted);line-height:1.75;display:none}
+  .probe-note.show{display:block}
+  .probe-note code{background:var(--card2);padding:1px 5px;border-radius:4px;font:10px var(--font-mono)}
+
   @keyframes riseIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:no-preference){
     .main-head{animation:riseIn var(--dur) var(--ease) both}
@@ -174,9 +239,38 @@
     <table><thead><tr><th>工具名</th><th>结果</th><th>说明</th></tr></thead>
       <tbody id="snapBody"><tr><td colspan="3" class="muted-t">加载中…</td></tr></tbody></table>
   </section>
+  <section class="probe" id="probe" aria-labelledby="probeTitle">
+    <div class="probe-head">
+      <h2 id="probeTitle">手动探测</h2>
+      <span class="ph-sub" id="probeSub">按下按钮，立刻把 11 项从头测一遍（与定时任务同口径），结果可写入监测日志。</span>
+      <button type="button" class="btn" id="probeGo">立即探测</button>
+    </div>
+    <div class="probe-body">
+      <div class="prog" id="progWrap" hidden>
+        <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+        <div class="prog-meta"><span id="progText">准备中…</span><span id="progPct">0%</span></div>
+      </div>
+      <ul class="steps" id="stepList"></ul>
+      <div class="probe-foot" id="probeFoot">
+        <span class="sum" id="probeSum"></span>
+        <button type="button" class="btn" id="probeCommit">写入监测日志</button>
+        <button type="button" class="btn ghost" id="probeCopy">复制结果</button>
+        <button type="button" class="btn ghost" id="probeAgain">再测一次</button>
+        <span class="copy-tip" id="copyTip">已复制</span>
+      </div>
+      <div class="probe-note" id="probeNote">
+        <b>怎么落进日志：</b>点「写入监测日志」打开 GitHub 新建文件页，文件名和内容都已填好，
+        选 <code>data/manual/</code> 目录提交即可。静态页在浏览器里没有仓库写权限，这一步必须你亲手点保存
+        ——本页是公开的，不能放密钥。<br>
+        <b>两者不互相覆盖：</b>手动记录存 <code>data/manual/</code>，不会改定时任务的 <code>latest.json</code>。
+        要让它出现在<a href="monitor.html" target="_blank">监测日志</a>里，是把这条记录合并进
+        <code>history.json</code> 的 <code>records</code>（写法见《部署必读》§6.2）。
+      </div>
+    </div>
+  </section>
   <div class="note"><b>说明：</b>本页是纯导航入口，点击工具直接跳转到原站点（新标签页），不做嵌入。各工具彼此独立，某个不可达不影响其他；监测快照为定时探测结果，<a href="monitor.html" target="_blank">查看监测日志</a>可查历史记录，实时探测在打开本页时进行，按真实 HTTP 状态判定（404/503 计为不可达）。</div>
 </main>
-<footer class="site-footer"><span data-build>v1.9 · 2026-11-27 00:20</span></footer>
+<footer class="site-footer"><span data-build>v1.10 · 2026-11-27 09:25</span></footer>
 <script>
 (function(){
   const nav=[...document.querySelectorAll('.tab')];
@@ -217,6 +311,274 @@
         return '<tr><td>'+name+'</td><td class="'+(t.ok?'ok-t':'bad-t')+'">'+(t.ok?'✓':'✗')+'</td><td class="'+(t.ok?'muted-t':'bad-t')+'">'+(t.ok?'':t.notes.join('；'))+'</td></tr>';
       }).join('');
     }).catch(()=>{});
+})();
+</script>
+<script>
+/* ============ 手动探测 ============ */
+/* 红线：本段判据必须与 scripts/monitor_snapshot.py 的 run() 逐条一致，
+   否则手动数据入历史后与定时数据不可比。那边改了就同步改这里（三处同源：
+   青龙脚本 / scripts/manual_probe.py / 本页）。 */
+(function(){
+  var ADDR = {
+    '相册展示': 'https://elizond0.github.io/album/base.json',
+    'PDF工具': 'https://elizond0.github.io/pdf-tools/nas.json'
+  };
+  var PAGES = {
+    '相册展示-前端': 'https://elizond0.github.io/album/',
+    'PDF工具-前端': 'https://elizond0.github.io/pdf-tools/',
+    '什么值得买-入口': 'https://elizond0.github.io/smzdm-daily/',
+    '哥俩好小游戏-入口': 'https://elizond0.github.io/gelianghao/',
+    '回形针游戏-入口': 'https://elizond0.github.io/paperclip-max/'
+  };
+  var TMO = 15000;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var list = $('stepList'), fill = $('progFill'), pText = $('progText'), pPct = $('progPct');
+  var goBtn = $('probeGo'), againBtn = $('probeAgain'), commitBtn = $('probeCommit'), copyBtn = $('probeCopy');
+  var foot = $('probeFoot'), sumEl = $('probeSum'), note = $('probeNote'), tip = $('copyTip');
+  var running = false, payload = null, stepEls = [];
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function fetchT(url, opt){
+    var ctl = new AbortController();
+    var t = setTimeout(function(){ ctl.abort(); }, TMO);
+    var o = Object.assign({cache:'no-store', signal:ctl.signal}, opt||{});
+    return fetch(url, o).then(function(r){ clearTimeout(t); return r; })
+      .catch(function(e){ clearTimeout(t); throw e; });
+  }
+
+  // ---- 11 项探测，顺序与青龙脚本一致 ----
+  var STEPS = [
+    {name:'相册展示-地址文件(base/nas.json)', run:function(a){ return probeAddr('相册展示', a); }},
+    {name:'PDF工具-地址文件(base/nas.json)', run:function(a){ return probeAddr('PDF工具', a); }},
+    {name:'相册展示-隧道 /api/health', run:function(a){ return probeHealth(a); }},
+    {name:'相册展示-隧道 index.json 缓存头', run:function(a){ return probeCache(a); }},
+    {name:'PDF工具-隧道门禁(无key)', run:function(a){ return probeGate(a); }},
+    {name:'PDF工具-隧道预检(OPTIONS)', run:function(a){ return probeOptions(a); }},
+    {name:'相册展示-前端', run:function(a){ return probePage(a, PAGES['相册展示-前端']); }},
+    {name:'PDF工具-前端', run:function(a){ return probePage(a, PAGES['PDF工具-前端']); }},
+    {name:'什么值得买-入口', run:function(a){ return probePage(a, PAGES['什么值得买-入口']); }},
+    {name:'哥俩好小游戏-入口', run:function(a){ return probePage(a, PAGES['哥俩好小游戏-入口']); }},
+    {name:'回形针游戏-入口', run:function(a){ return probePage(a, PAGES['回形针游戏-入口']); }}
+  ];
+
+  function probeAddr(tool, ctx){
+    return fetchT(ADDR[tool] + '?t=' + Date.now()).then(function(r){
+      if(r.status !== 200) return {ok:false, detail:'HTTP ' + r.status};
+      return r.json().then(function(d){
+        var addr = String(d.base || d.url || '').trim();
+        if(!addr) return {ok:false, detail:'地址字段为空'};
+        ctx.addr[tool] = addr;
+        return {ok:true, detail:'地址=' + addr};
+      }).catch(function(){ return {ok:false, detail:'返回不是 JSON'}; });
+    }).catch(function(){ return {ok:false, detail:'无响应或超时'}; });
+  }
+
+  function needAddr(tool, ctx){
+    if(ctx.addr[tool]) return null;
+    return {ok:false, detail:'地址文件失败，无法探测'};
+  }
+
+  function probeHealth(ctx){
+    var miss = needAddr('相册展示', ctx); if(miss) return Promise.resolve(miss);
+    var b = ctx.addr['相册展示'];
+    return fetchT(b + '/api/health').then(function(r){
+      return r.text().then(function(txt){
+        var acao = r.headers.get('access-control-allow-origin') || '-';
+        var ok = r.status === 200 && txt.replace(/\s/g,'').indexOf('"ok":true') !== -1;
+        return {ok:ok, detail:'HTTP ' + r.status + ' body=' + txt.trim().slice(0,40) + ' ACAO=' + acao};
+      });
+    }).catch(function(){ return {ok:false, detail:'无响应或超时'}; });
+  }
+
+  function probeCache(ctx){
+    var miss = needAddr('相册展示', ctx); if(miss) return Promise.resolve(miss);
+    var b = ctx.addr['相册展示'];
+    return fetchT(b + '/index.json').then(function(r){
+      var cc = r.headers.get('cache-control') || '';
+      return {ok: r.status === 200 && cc === 'no-store', detail:'HTTP ' + r.status + ' cache-control=' + cc};
+    }).catch(function(){ return {ok:false, detail:'无响应或超时'}; });
+  }
+
+  function probeGate(ctx){
+    var miss = needAddr('PDF工具', ctx); if(miss) return Promise.resolve(miss);
+    var u = ctx.addr['PDF工具'];
+    /* 这一项与命令行口径**必然不同**，原因写在这（别当成 bug 去“修”）：
+       PDF 隧道对无 key 的请求回 403，而那个 403 **不带 Access-Control-Allow-Origin**
+       （2026-11-27 实测，带 Origin 请求头也一样）。浏览器的 cors fetch 遇到这种响应
+       读不到状态码，只会抛错——所以「拿 403 判通过」在浏览器里根本做不到。
+       退一步的判据：no-cors 取 opaque 响应，能拿到就说明隧道通、且确实拒绝了我们
+       （不拒绝的话 200 也是 opaque，所以这里只能证明「连得上」）。
+       命令行版 scripts/manual_probe.py 仍按 `st === 403` 判，两边在 detail 里各自写明。 */
+    return fetchT(u + '/api/v1/info/status', {mode:'no-cors'}).then(function(r){
+      // opaque 响应读不到 status，只能证明「连得上」
+      var reach = !!(r && (r.type === 'opaque' || r.type === 'cors' || r.status));
+      return reach
+        ? {ok:true, detail:'隧道可达（403 无 CORS 头，浏览器读不到状态码，按可达计）'}
+        : {ok:false, detail:'响应类型异常：' + (r && r.type)};
+    }).catch(function(){
+      return {ok:false, detail:'不可达（网络失败或超时）'};
+    });
+  }
+
+  function probeOptions(ctx){
+    var miss = needAddr('PDF工具', ctx); if(miss) return Promise.resolve(miss);
+    var u = ctx.addr['PDF工具'];
+    return fetchT(u + '/api/v1/misc/compress-pdf', {method:'OPTIONS'}).then(function(r){
+      var acao = r.headers.get('access-control-allow-origin') || '';
+      return {ok: r.status === 204, detail:'HTTP ' + r.status + ' ACAO=' + acao};
+    }).catch(function(){ return {ok:false, detail:'无响应或超时'}; });
+  }
+
+  function probePage(ctx, url){
+    return fetchT(url + '?t=' + Date.now()).then(function(r){
+      return {ok: r.status === 200, detail:'HTTP ' + r.status};
+    }).catch(function(){ return {ok:false, detail:'无响应或超时'}; });
+  }
+
+  function pad(n){ return (n<10?'0':'') + n; }
+  function stamp(){
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' +
+           pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function stampFile(){
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + '-' +
+           pad(d.getHours()) + pad(d.getMinutes()); 
+  }
+
+  function setProgress(i, total){
+    var pct = Math.round(i / total * 100);
+    fill.style.width = pct + '%';
+    pPct.textContent = pct + '%';
+    pText.textContent = (i < total) ? ('正在探测 ' + (i+1) + '/' + total + '：' + STEPS[i].name)
+                                    : ('探测完成 ' + total + '/' + total);
+  }
+
+  function runProbe(){
+    if(running) return;
+    running = true;
+    payload = null;
+    goBtn.disabled = true; goBtn.hidden = false;
+    againBtn.hidden = true; commitBtn.disabled = true;
+    foot.classList.remove('show'); note.classList.remove('show'); tip.classList.remove('show');
+    $('progWrap').hidden = false;
+    fill.className = 'prog-fill'; fill.style.width = '0%';
+    list.innerHTML = STEPS.map(function(s, i){
+      return '<li class="step" data-i="' + i + '" style="animation-delay:' + (i*22) + 'ms">' +
+             '<span class="ic"></span><span class="nm">' + esc(s.name) + '</span>' +
+             '<span class="dt">待测</span></li>';
+    }).join('');
+    stepEls = Array.prototype.slice.call(list.querySelectorAll('.step'));
+
+    var ctx = {addr:{}}, results = [];
+    var i = 0;
+
+    function next(){
+      if(i >= STEPS.length) return finish(results);
+      var idx = i;
+      var el = stepEls[idx];
+      el.classList.add('run');
+      el.querySelector('.dt').textContent = '探测中…';
+      setProgress(idx, STEPS.length);
+
+      STEPS[idx].run(ctx).then(function(r){
+        results.push({item: STEPS[idx].name, ok: !!r.ok, detail: r.detail});
+        el.classList.remove('run');
+        el.classList.add(r.ok ? 'ok' : 'bad');
+        el.querySelector('.dt').textContent = r.detail;
+        i++;
+        // 留 120ms 让人看清状态色再进下一条，整体 11 条约 3~5 秒
+        setTimeout(next, 120);
+      });
+    }
+    next();
+  }
+
+  function finish(results){
+    var total = results.length;
+    var good = results.filter(function(r){ return r.ok; }).length;
+    var bad = total - good;
+    payload = {date: stamp(), summary: good + '/' + total, results: results, source: 'manual'};
+
+    fill.className = 'prog-fill ' + (bad ? 'has-bad' : 'done');
+    fill.style.width = '100%';
+    pPct.textContent = '100%';
+    pText.textContent = '探测完成 ' + good + '/' + total + (bad ? '（' + bad + ' 项异常）' : '（全部正常）');
+    sumEl.innerHTML = '本次结果 <b>' + good + '/' + total + '</b>' +
+      (bad ? ' · 异常 <b style="color:var(--bad)">' + bad + '</b> 项' : ' · 无异常');
+    foot.classList.add('show');
+    note.classList.add('show');
+    commitBtn.disabled = false;
+    // 主按钮完成后退场，避免与「再测一次」并排出现两个同义按钮
+    goBtn.hidden = true;
+    againBtn.hidden = false;
+    running = false;
+  }
+
+  // ---- 写入监测日志：GitHub 新建文件页，文件名与内容走 URL 预填 ----
+  function commitUrl(){
+    if(!payload) return '';
+    var name = 'data/manual/' + stampFile() + '.json';
+    var body = JSON.stringify(payload, null, 2) + '\n';
+    return 'https://github.com/elizond0/tools-hub/new/main' +
+           '?filename=' + encodeURIComponent(name) +
+           '&value=' + encodeURIComponent(body);
+  }
+
+  function copyText(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(text).then(function(){ return true; }).catch(function(){ return false; });
+    }
+    return Promise.resolve(false);
+  }
+
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch(e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function showTip(msg, bad){
+    tip.textContent = msg;
+    tip.style.color = bad ? 'var(--bad)' : 'var(--ok)';
+    tip.classList.add('show');
+    setTimeout(function(){ tip.classList.remove('show'); }, 2600);
+  }
+
+  goBtn.addEventListener('click', runProbe);
+  againBtn.addEventListener('click', runProbe);
+
+  commitBtn.addEventListener('click', function(){
+    if(!payload) return;
+    var url = commitUrl();
+    var w = window.open(url, '_blank', 'noopener');
+    if(!w){
+      showTip('弹窗被拦，请允许后重试', true);
+      return;
+    }
+    // 顺手把 JSON 也复制进剪贴板，万一 GitHub 预填失效可以直接粘贴
+    copyText(JSON.stringify(payload, null, 2) + '\n').then(function(ok){
+      if(!ok) fallbackCopy(JSON.stringify(payload, null, 2) + '\n');
+      showTip('已复制 JSON，可用作粘贴备份');
+    });
+  });
+
+  copyBtn.addEventListener('click', function(){
+    if(!payload) return;
+    var body = JSON.stringify(payload, null, 2) + '\n';
+    copyText(body).then(function(ok){
+      if(!ok) ok = fallbackCopy(body);
+      showTip(ok ? '已复制' : '复制失败，请手动选择', !ok);
+    });
+  });
 })();
 </script>
 </body>
